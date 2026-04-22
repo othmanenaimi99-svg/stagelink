@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block title %}Offres de stage — StageLink MA{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="topbar-search">
+    <form action="{{ url_for('etudiant.offres') }}" method="GET">
+      <input type="text" name="q" value="{{ request.args.get('q','') }}" placeholder="Rechercher une offre, entreprise..." class="form-control" style="font-size:12px;padding:7px 12px">
+    </form>
+  </div>
+  <div class="topbar-right">
+    <a href="{{ url_for('etudiant.marquer_notifications_lues') }}" class="notif-btn">
+      🔔{% if notif_count > 0 %}<span class="notif-dot"></span>{% endif %}
+    </a>
+    <div class="avatar">{{ etudiant.initiales }}</div>
+    <span style="font-size:13px;color:#666">{{ etudiant.nom_complet.split()[0] }} {{ etudiant.nom_complet.split()[-1][0] if etudiant.nom_complet.split()|length > 1 else '' }}.</span>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-container"><div class="flash flash-{{ category }}">{{ message }}</div></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="body-layout">
+  <div class="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar avatar-lg" style="margin-bottom:8px">{{ etudiant.initiales }}</div>
+      <div class="sidebar-profile-name">{{ etudiant.nom_complet }}</div>
+      <div class="sidebar-profile-sub">{{ etudiant.filiere }} · {{ etudiant.niveau }} · {{ etudiant.universite }}</div>
+      <div class="profile-bar-wrap">
+        <div class="profile-bar-label"><span>Profil complété</span><span>{{ etudiant.completion_profil }}%</span></div>
+        <div class="profile-bar"><div class="profile-bar-fill" style="width:{{ etudiant.completion_profil }}%"></div></div>
+      </div>
+    </div>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Navigation</span>
+    <a href="{{ url_for('etudiant.dashboard') }}" class="sid-item">◆ Tableau de bord</a>
+    <a href="{{ url_for('etudiant.offres') }}" class="sid-item active">📋 Offres <span class="sid-badge">{{ nb_offres_count|default('') }}</span></a>
+    <a href="{{ url_for('etudiant.candidatures') }}" class="sid-item">📁 Mes candidatures</a>
+    <a href="{{ url_for('etudiant.profil') }}" class="sid-item">👤 Mon profil</a>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Raccourcis</span>
+    <a href="{{ url_for('etudiant.offres') }}" class="sid-item">⭐ Top matchs</a>
+    <a href="{{ url_for('etudiant.candidatures') }}?statut=REFUSEE" class="sid-item">💬 Feedbacks reçus</a>
+    <div class="sid-divider"></div>
+    <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)">↩ Déconnexion</a>
+  </div>
+
+  <div class="main">
+    <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h2 style="font-size:18px;font-weight:500">Offres de stage</h2>
+        <p style="font-size:13px;color:#666;margin-top:2px">{{ offres|length }} offre{{ 's' if offres|length != 1 }} trouvée{{ 's' if offres|length != 1 }} · triées par score de matching</p>
+      </div>
+    </div>
+
+    <form method="GET" action="{{ url_for('etudiant.offres') }}" id="filter-form">
+      {% if request.args.get('q') %}<input type="hidden" name="q" value="{{ request.args.get('q') }}">{% endif %}
+      <div class="filters-bar">
+        <div class="filter-group">
+          <span class="filter-label">Filière</span>
+          <div class="filter-chips">
+            <label class="filter-chip {% if not request.args.get('filiere') %}active{% endif %}">
+              <input type="radio" name="filiere" value="" {% if not request.args.get('filiere') %}checked{% endif %} onchange="this.form.submit()"> Toutes
+            </label>
+            {% for f in ['Finance','Marketing','Gestion','Informatique','Logistique','RH','Commerce','Comptabilité'] %}
+            <label class="filter-chip {% if request.args.get('filiere') == f %}active{% endif %}">
+              <input type="radio" name="filiere" value="{{ f }}" {% if request.args.get('filiere') == f %}checked{% endif %} onchange="this.form.submit()"> {{ f }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px">
+          <div class="filter-group" style="flex-direction:row;align-items:center;gap:8px">
+            <span class="filter-label">Ville</span>
+            <select name="ville" class="form-control form-control-sm" onchange="this.form.submit()" style="width:140px">
+              <option value="">Toutes les villes</option>
+              {% for v in ['Marrakech','Casablanca','Rabat','Agadir','Fès','Tanger','Khouribga','Autre'] %}
+              <option value="{{ v }}" {% if request.args.get('ville') == v %}selected{% endif %}>{{ v }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group" style="flex-direction:row;align-items:center;gap:8px">
+            <span class="filter-label">Durée</span>
+            <select name="duree" class="form-control form-control-sm" onchange="this.form.submit()" style="width:140px">
+              <option value="">Toutes durées</option>
+              <option value="1" {% if request.args.get('duree') == '1' %}selected{% endif %}>1 mois</option>
+              <option value="2" {% if request.args.get('duree') == '2' %}selected{% endif %}>2 mois</option>
+              <option value="3" {% if request.args.get('duree') == '3' %}selected{% endif %}>3 mois</option>
+              <option value="6" {% if request.args.get('duree') == '6' %}selected{% endif %}>6 mois</option>
+            </select>
+          </div>
+          <div class="filter-group" style="flex-direction:row;align-items:center;gap:8px">
+            <span class="filter-label">Trier par</span>
+            <select name="tri" class="form-control form-control-sm" onchange="this.form.submit()" style="width:160px">
+              <option value="score" {% if request.args.get('tri','score') == 'score' %}selected{% endif %}>Score matching</option>
+              <option value="date" {% if request.args.get('tri') == 'date' %}selected{% endif %}>Date (récent)</option>
+              <option value="duree" {% if request.args.get('tri') == 'duree' %}selected{% endif %}>Durée</option>
+            </select>
+          </div>
+          {% if request.args.get('filiere') or request.args.get('ville') or request.args.get('duree') %}
+          <a href="{{ url_for('etudiant.offres') }}{% if request.args.get('q') %}?q={{ request.args.get('q') }}{% endif %}" class="btn btn-secondary btn-sm" style="font-size:11px;padding:5px 10px">✕ Réinitialiser</a>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+
+    {% if offres %}
+    <div class="offers-grid">
+      {% for offre, detail in offres %}
+      <a href="{{ url_for('etudiant.detail_offre', offre_id=offre.id) }}" class="offer-card {% if detail.is_top_match %}top-match{% endif %}" style="text-decoration:none;color:inherit;display:block">
+        {% if detail.is_top_match %}
+        <div class="top-match-badge">⭐ Top match</div>
+        {% endif %}
+        <div class="offer-card-header">
+          <div class="co-logo" style="background:var(--primary-light);color:var(--primary-dark)">{{ offre.entreprise.initiales }}</div>
+          <div style="flex:1;min-width:0">
+            <div class="offer-title">{{ offre.titre }}</div>
+            <div class="offer-company">{{ offre.entreprise.nom }}</div>
+            <div class="offer-meta">
+              <span>📍 {{ offre.ville }}</span>
+              <span>⏱ {{ offre.duree }} mois</span>
+              {% if offre.remuneration %}<span>💰 {{ offre.remuneration }} MAD</span>{% endif %}
+            </div>
+          </div>
+          <div class="score-circle {{ detail.color }}" title="Score de matching">
+            {{ detail.total|int }}%
+          </div>
+        </div>
+
+        <div style="margin:10px 0 8px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--gray-500);margin-bottom:3px">
+            <span>Score de matching</span>
+            <span style="font-weight:500;color:{% if detail.color == 'primary' %}var(--primary){% elif detail.color == 'green' %}var(--green){% else %}var(--orange){% endif %}">{{ detail.total|int }}%</span>
+          </div>
+          <div class="reco-bar">
+            <div class="reco-bar-fill" style="width:{{ detail.total }}%;background:{% if detail.color == 'primary' %}var(--primary){% elif detail.color == 'green' %}var(--green){% else %}var(--orange){% endif %}"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:6px;font-size:10px;color:var(--gray-500);margin-bottom:8px">
+          <span style="color:{% if detail.filiere > 0 %}var(--green){% else %}var(--gray-400){% endif %}">Filière {{ detail.filiere|int }}%</span>
+          <span>·</span>
+          <span style="color:{% if detail.competences > 0 %}var(--green){% else %}var(--gray-400){% endif %}">Compétences {{ detail.competences|int }}%</span>
+          <span>·</span>
+          <span style="color:{% if detail.ville > 0 %}var(--green){% else %}var(--gray-400){% endif %}">Ville {{ detail.ville|int }}%</span>
+        </div>
+
+        <div class="tags">
+          {% for c in offre.competences[:4] %}
+          <span class="tag {% if c in etudiant.competences %}match{% endif %}">{{ c.nom }}</span>
+          {% endfor %}
+          {% if offre.competences|length > 4 %}
+          <span class="tag">+{{ offre.competences|length - 4 }}</span>
+          {% endif %}
+        </div>
+
+        <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:10px;color:var(--gray-400)">{{ offre.nb_candidatures }} candidature{{ 's' if offre.nb_candidatures != 1 }}</span>
+          <span class="btn btn-primary btn-sm" style="pointer-events:none;font-size:11px;padding:5px 12px">Voir l'offre →</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:48px 20px;color:var(--gray-500)">
+      <div style="font-size:32px;margin-bottom:12px">📋</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:6px">Aucune offre trouvée</div>
+      <div style="font-size:12px">Essayez de modifier vos filtres ou votre recherche.</div>
+      {% if request.args.get('filiere') or request.args.get('ville') or request.args.get('duree') or request.args.get('q') %}
+      <a href="{{ url_for('etudiant.offres') }}" class="btn btn-secondary btn-sm" style="margin-top:14px;display:inline-block">Voir toutes les offres</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Tableau de bord — StageLink MA{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="topbar-right">
+    <div class="avatar" style="background:var(--green-light);color:var(--green-dark)">{{ entreprise.initiales }}</div>
+    <span style="font-size:13px;color:#666">{{ entreprise.nom }}</span>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-container"><div class="flash flash-{{ category }}">{{ message }}</div></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="body-layout">
+  <div class="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar avatar-lg" style="background:var(--green-light);color:var(--green-dark);margin-bottom:8px">{{ entreprise.initiales }}</div>
+      <div class="sidebar-profile-name">{{ entreprise.nom }}</div>
+      <div class="sidebar-profile-sub">{{ entreprise.secteur }} · {{ entreprise.ville }}</div>
+      {% if entreprise.verifie %}
+      <div style="margin-top:6px;font-size:11px;background:var(--green-light);color:var(--green-dark);padding:3px 8px;border-radius:4px;display:inline-block">✓ Entreprise vérifiée</div>
+      {% else %}
+      <div style="margin-top:6px;font-size:11px;background:#FEF3C7;color:#92400E;padding:3px 8px;border-radius:4px;display:inline-block">⏳ En attente de vérification</div>
+      {% endif %}
+    </div>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Navigation</span>
+    <a href="{{ url_for('entreprise.dashboard') }}" class="sid-item active">◆ Tableau de bord</a>
+    <a href="{{ url_for('entreprise.candidatures') }}" class="sid-item">📁 Candidatures <span class="sid-badge sid-badge-red">{{ entreprise.nb_candidatures_en_attente }}</span></a>
+    <a href="{{ url_for('entreprise.offres') }}" class="sid-item">📋 Mes offres</a>
+    <a href="{{ url_for('entreprise.profil') }}" class="sid-item">🏢 Mon profil</a>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Actions</span>
+    <a href="{{ url_for('entreprise.nouvelle_offre') }}" class="sid-item">+ Nouvelle offre</a>
+    <div class="sid-divider"></div>
+    <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)">↩ Déconnexion</a>
+  </div>
+
+  <div class="main">
+    <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h2 style="font-size:18px;font-weight:500">Bonjour, {{ entreprise.nom }}</h2>
+        <p style="font-size:13px;color:#666;margin-top:2px">Tableau de bord recruteur</p>
+      </div>
+      <a href="{{ url_for('entreprise.nouvelle_offre') }}" class="btn btn-primary btn-sm">+ Publier une offre</a>
+    </div>
+
+    {% if not entreprise.verifie %}
+    <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#78350F">
+      ⚠️ Votre compte est en attente de vérification par l'équipe StageLink MA. Certaines fonctionnalités seront disponibles après validation.
+    </div>
+    {% endif %}
+
+    <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="metric"><div class="metric-label">Offres actives</div><div class="metric-val blue">{{ nb_offres_actives }}</div><div class="metric-sub">offres publiées</div></div>
+      <div class="metric"><div class="metric-label">Candidatures</div><div class="metric-val blue">{{ nb_candidatures_total }}</div><div class="metric-sub">dont {{ entreprise.nb_candidatures_en_attente }} en attente</div></div>
+      <div class="metric"><div class="metric-label">Acceptées</div><div class="metric-val green">{{ nb_acceptees }}</div><div class="metric-sub">stagiaires acceptés</div></div>
+      <div class="metric"><div class="metric-label">Taux d'acceptation</div><div class="metric-val blue">{{ entreprise.taux_acceptation }}%</div><div class="metric-sub">sur toutes offres</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px">
+      <div class="card">
+        <div class="card-title">Candidatures récentes <a href="{{ url_for('entreprise.candidatures') }}">Voir tout →</a></div>
+        {% for c in candidatures_recentes %}
+        <div class="cand-item">
+          <div class="cand-avatar" style="background:var(--primary-light);color:var(--primary-dark)">{{ c.etudiant.initiales }}</div>
+          <div class="cand-info">
+            <div class="cand-title">{{ c.etudiant.utilisateur.nom }}</div>
+            <div class="cand-company">{{ c.offre.titre }} · {{ c.etudiant.filiere }}</div>
+          </div>
+          <span class="badge-statut {{ c.statut_class }}">{{ c.statut_label }}</span>
+          <span style="font-size:10px;color:var(--gray-500);margin-left:6px">{{ c.score_matching|int }}%</span>
+        </div>
+        {% else %}
+        <p style="font-size:12px;color:var(--gray-500);text-align:center;padding:14px 0">Aucune candidature pour l'instant.</p>
+        {% endfor %}
+        {% if entreprise.nb_candidatures_en_attente > 0 %}
+        <a href="{{ url_for('entreprise.candidatures') }}?statut=EN_ATTENTE" class="btn btn-primary btn-full" style="margin-top:10px;font-size:12px;padding:8px">Traiter les candidatures en attente ({{ entreprise.nb_candidatures_en_attente }})</a>
+        {% endif %}
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title" style="font-size:13px">Mes offres actives</div>
+          {% for offre in offres_actives %}
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ offre.titre }}</div>
+              <div style="font-size:10px;color:var(--gray-500)">{{ offre.nb_candidatures }} candidature{{ 's' if offre.nb_candidatures != 1 }} · {{ offre.ville }}</div>
+            </div>
+            <a href="{{ url_for('entreprise.candidatures') }}?offre_id={{ offre.id }}" class="btn btn-secondary btn-xs">Voir</a>
+          </div>
+          {% else %}
+          <p style="font-size:12px;color:var(--gray-500);text-align:center;padding:10px 0">Aucune offre active.</p>
+          {% endfor %}
+          <a href="{{ url_for('entreprise.nouvelle_offre') }}" class="btn btn-primary btn-full" style="margin-top:10px;font-size:12px;padding:7px">+ Publier une offre</a>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="font-size:13px">Statistiques</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">
+                <span style="color:var(--gray-500)">Taux d'acceptation</span>
+                <span style="font-weight:500;color:var(--green)">{{ entreprise.taux_acceptation }}%</span>
+              </div>
+              <div class="reco-bar"><div class="reco-bar-fill" style="width:{{ entreprise.taux_acceptation }}%;background:var(--green)"></div></div>
+            </div>
+            <div style="font-size:11px;color:var(--gray-500);display:flex;justify-content:space-between">
+              <span>Offres fermées</span><span style="font-weight:500;color:var(--gray-700)">{{ nb_offres_fermees }}</span>
+            </div>
+            <div style="font-size:11px;color:var(--gray-500);display:flex;justify-content:space-between">
+              <span>Refus sans feedback</span><span style="font-weight:500;color:{% if nb_sans_feedback > 0 %}var(--red){% else %}var(--green){% endif %}">{{ nb_sans_feedback }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

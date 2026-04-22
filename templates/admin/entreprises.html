@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Entreprises — Administration StageLink MA{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="topbar-right">
+    <div class="avatar" style="background:#7C3AED;color:#fff">A</div>
+    <span style="font-size:13px;color:#666">Administrateur</span>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-container"><div class="flash flash-{{ category }}">{{ message }}</div></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="body-layout">
+  <div class="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar avatar-lg" style="background:#7C3AED;color:#fff;margin-bottom:8px">A</div>
+      <div class="sidebar-profile-name">Administration</div>
+      <div class="sidebar-profile-sub">StageLink MA</div>
+    </div>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Administration</span>
+    <a href="{{ url_for('admin.dashboard') }}" class="sid-item">◆ Tableau de bord</a>
+    <a href="{{ url_for('admin.entreprises') }}" class="sid-item active">🏢 Entreprises</a>
+    <a href="{{ url_for('admin.utilisateurs') }}" class="sid-item">👥 Utilisateurs</a>
+    <a href="{{ url_for('admin.offres') }}" class="sid-item">📋 Offres</a>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Export</span>
+    <a href="{{ url_for('admin.export_pdf') }}" class="sid-item">📊 Rapport PDF</a>
+    <div class="sid-divider"></div>
+    <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)">↩ Déconnexion</a>
+  </div>
+
+  <div class="main">
+    <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h2 style="font-size:18px;font-weight:500">Gestion des entreprises</h2>
+        <p style="font-size:13px;color:#666;margin-top:2px">{{ entreprises|length }} entreprise{{ 's' if entreprises|length != 1 }}</p>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <a href="{{ url_for('admin.entreprises') }}" class="filter-chip {% if not statut_filtre %}active{% endif %}" style="text-decoration:none">Toutes</a>
+      <a href="{{ url_for('admin.entreprises') }}?statut=verifiee" class="filter-chip {% if statut_filtre == 'verifiee' %}active{% endif %}" style="text-decoration:none">Vérifiées</a>
+      <a href="{{ url_for('admin.entreprises') }}?statut=en_attente" class="filter-chip {% if statut_filtre == 'en_attente' %}active{% endif %}" style="text-decoration:none">En attente</a>
+      <a href="{{ url_for('admin.entreprises') }}?statut=suspendue" class="filter-chip {% if statut_filtre == 'suspendue' %}active{% endif %}" style="text-decoration:none">Suspendues</a>
+    </div>
+
+    {% if entreprises %}
+    <div class="card" style="padding:0;overflow:hidden">
+      {% for e in entreprises %}
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);{% if loop.last %}border-bottom:none{% endif %}">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="cand-avatar" style="background:var(--green-light);color:var(--green-dark);flex-shrink:0">{{ e.initiales }}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">
+              <div style="font-size:13px;font-weight:500">{{ e.nom }}</div>
+              {% if e.verifie %}
+              <span style="font-size:10px;background:var(--green-light);color:var(--green-dark);padding:2px 7px;border-radius:4px">✓ Vérifiée</span>
+              {% elif not e.utilisateur.actif %}
+              <span style="font-size:10px;background:var(--red-light);color:var(--red-dark);padding:2px 7px;border-radius:4px">Suspendue</span>
+              {% else %}
+              <span style="font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 7px;border-radius:4px">⏳ En attente</span>
+              {% endif %}
+            </div>
+            <div style="font-size:11px;color:var(--gray-500)">
+              {{ e.secteur }} · {{ e.ville }} · {{ e.taille }}
+              {% if e.rc %} · RC: {{ e.rc }}{% endif %}
+            </div>
+            <div style="font-size:11px;color:var(--gray-400);margin-top:2px">
+              {{ e.offres|length }} offre{{ 's' if e.offres|length != 1 }} · {{ e.utilisateur.email }}
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
+            {% if not e.verifie and e.utilisateur.actif %}
+            <form method="POST" action="{{ url_for('admin.approuver_entreprise', entreprise_id=e.id) }}" style="display:inline">
+              <button type="submit" class="btn btn-green btn-xs">✓ Approuver</button>
+            </form>
+            <form method="POST" action="{{ url_for('admin.rejeter_entreprise', entreprise_id=e.id) }}" style="display:inline" onsubmit="return confirm('Rejeter cette entreprise ?')">
+              <button type="submit" class="btn btn-xs" style="background:var(--red-light);color:var(--red-dark);border:1px solid #FCA5A5">✕ Rejeter</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{{ url_for('admin.suspendre_utilisateur', utilisateur_id=e.utilisateur.id) }}" style="display:inline" onsubmit="return confirm('{{ 'Réactiver' if not e.utilisateur.actif else 'Suspendre' }} ce compte ?')">
+              <button type="submit" class="btn btn-xs" style="background:var(--gray-100);color:var(--gray-600);border:1px solid var(--border)">
+                {{ '▶ Réactiver' if not e.utilisateur.actif else '⏸ Suspendre' }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:48px 20px;color:var(--gray-500)">
+      <div style="font-size:32px;margin-bottom:12px">🏢</div>
+      <div style="font-size:14px;font-weight:500">Aucune entreprise trouvée</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

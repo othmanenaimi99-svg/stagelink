@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}StageLink MA — Plateforme nationale de stages{% endblock %}
+{% block body %}
+<div class="sl-wrap">
+<nav class="sl-nav">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="sl-nav-links">
+    <a href="{{ url_for('etudiant.offres') if current_user.is_authenticated else '#' }}">Offres</a>
+    <a href="#">Comment ça marche</a>
+    <a href="#">Entreprises</a>
+    <a href="{{ url_for('set_lang', code='en' if lang == 'fr' else 'fr') }}"
+       style="font-size:12px;background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer">
+      {{ 'EN' if lang == 'fr' else 'FR' }} / {{ 'FR' if lang == 'fr' else 'EN' }}
+    </a>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-sm">Connexion</a>
+    <a href="{{ url_for('auth.register_step1') }}" class="btn btn-primary btn-sm">S'inscrire</a>
+  </div>
+</nav>
+
+<div class="sl-hero">
+  <div class="sl-hero-badge">
+    <span style="width:6px;height:6px;border-radius:50%;background:var(--primary);display:inline-block"></span>
+    Plateforme nationale de stages · Maroc
+  </div>
+  <h1>Trouvez le stage <em>parfait</em> grâce à l'intelligence du matching</h1>
+  <p>StageLink MA connecte les étudiants marocains aux entreprises qui correspondent vraiment à leur profil — filière, compétences, ville.</p>
+  <div class="sl-hero-cta">
+    <a href="{{ url_for('auth.register_step1') }}" class="btn btn-primary" style="padding:11px 24px;font-size:14px">Je cherche un stage</a>
+    <a href="{{ url_for('auth.register_step1') }}" class="btn btn-secondary" style="padding:11px 24px;font-size:14px">Je recrute un stagiaire</a>
+  </div>
+</div>
+
+<div class="sl-stats">
+  <div class="sl-stat"><div class="sl-stat-num">500k+</div><div class="sl-stat-label">Étudiants en recherche chaque année</div></div>
+  <div class="sl-stat"><div class="sl-stat-num">87%</div><div class="sl-stat-label">Taux de matching pertinent</div></div>
+  <div class="sl-stat"><div class="sl-stat-num">0 piston</div><div class="sl-stat-label">Accès équitable pour tous</div></div>
+</div>
+
+<div class="sl-section">
+  <div class="sl-section-title">Pourquoi StageLink MA ?</div>
+  <div class="sl-section-sub">Ce que les autres plateformes ne font pas</div>
+  <div class="sl-features">
+    <div class="sl-feat"><div class="sl-feat-icon" style="background:#E6F1FB">🎯</div><h3>Matching intelligent</h3><p>Score calculé sur filière, compétences et ville. Tu vois instantanément les offres qui te correspondent.</p></div>
+    <div class="sl-feat"><div class="sl-feat-icon" style="background:#E1F5EE">📄</div><h3>Convention automatique</h3><p>Une fois accepté, ta convention de stage est générée en PDF automatiquement.</p></div>
+    <div class="sl-feat"><div class="sl-feat-icon" style="background:#FAEEDA">⭐</div><h3>Feedback obligatoire</h3><p>Chaque refus est accompagné d'un retour de l'entreprise. Tu sais pourquoi, tu progresses.</p></div>
+    <div class="sl-feat"><div class="sl-feat-icon" style="background:#EEEDFE">👥</div><h3>Entreprises vérifiées</h3><p>Toutes les entreprises sont validées par notre équipe. Pas de fausses offres.</p></div>
+    <div class="sl-feat"><div class="sl-feat-icon" style="background:#EAF3DE">🏛️</div><h3>Toutes les universités</h3><p>ENCG, ENSA, FSJES, ISCAE... Toutes les filières, toutes les villes du Maroc.</p></div>
+    <div class="sl-feat"><div class="sl-feat-icon" style="background:#FAECE7">📊</div><h3>Suivi en temps réel</h3><p>Suis toutes tes candidatures depuis ton tableau de bord.</p></div>
+  </div>
+</div>
+
+<div class="sl-section" style="padding-top:0">
+  <div class="sl-section-title">Pour chaque acteur</div>
+  <div class="sl-section-sub">Une expérience adaptée à votre rôle</div>
+  <div class="sl-roles">
+    <div class="sl-role">
+      <div class="sl-role-header">
+        <div class="sl-role-icon" style="background:#E6F1FB">👤</div>
+        <h3>Étudiant</h3>
+      </div>
+      <ul>
+        <li><span style="color:var(--primary)">›</span>Voir son score de matching pour chaque offre</li>
+        <li><span style="color:var(--primary)">›</span>Postuler en 1 clic avec lettre générée auto</li>
+        <li><span style="color:var(--primary)">›</span>Télécharger sa convention PDF après acceptation</li>
+        <li><span style="color:var(--primary)">›</span>Recevoir un feedback après chaque refus</li>
+      </ul>
+    </div>
+    <div class="sl-role">
+      <div class="sl-role-header">
+        <div class="sl-role-icon" style="background:#E1F5EE">🏢</div>
+        <h3>Entreprise</h3>
+      </div>
+      <ul>
+        <li><span style="color:var(--green-btn)">›</span>Publier des offres et définir le profil idéal</li>
+        <li><span style="color:var(--green-btn)">›</span>Consulter les candidatures triées par score</li>
+        <li><span style="color:var(--green-btn)">›</span>Badge "Entreprise vérifiée" visible par tous</li>
+        <li><span style="color:var(--green-btn)">›</span>Tableau de bord avec analytics de recrutement</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="sl-cta-strip">
+  <h2>Prêt à trouver votre stage idéal ?</h2>
+  <p>Rejoignez des milliers d'étudiants marocains qui trouvent leur stage sans piston.</p>
+  <div class="sl-cta-btns">
+    <a href="{{ url_for('auth.register_step1') }}" class="btn btn-white">Créer mon profil étudiant</a>
+    <a href="{{ url_for('auth.register_step1') }}" class="btn btn-outline-white">Publier une offre</a>
+  </div>
+</div>
+
+<div class="sl-footer">
+  <div class="logo" style="font-size:14px">Stage<span>Link</span> MA</div>
+  <p>© 2025 StageLink MA · Plateforme nationale de stages</p>
+  <p>FR / EN · Confidentialité · CGU</p>
+</div>
+</div>
+{% endblock %}

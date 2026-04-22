@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Offres — Administration StageLink MA{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="topbar-right">
+    <div class="avatar" style="background:#7C3AED;color:#fff">A</div>
+    <span style="font-size:13px;color:#666">Administrateur</span>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-container"><div class="flash flash-{{ category }}">{{ message }}</div></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="body-layout">
+  <div class="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar avatar-lg" style="background:#7C3AED;color:#fff;margin-bottom:8px">A</div>
+      <div class="sidebar-profile-name">Administration</div>
+      <div class="sidebar-profile-sub">StageLink MA</div>
+    </div>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Administration</span>
+    <a href="{{ url_for('admin.dashboard') }}" class="sid-item">◆ Tableau de bord</a>
+    <a href="{{ url_for('admin.entreprises') }}" class="sid-item">🏢 Entreprises</a>
+    <a href="{{ url_for('admin.utilisateurs') }}" class="sid-item">👥 Utilisateurs</a>
+    <a href="{{ url_for('admin.offres') }}" class="sid-item active">📋 Offres</a>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Export</span>
+    <a href="{{ url_for('admin.export_pdf') }}" class="sid-item">📊 Rapport PDF</a>
+    <div class="sid-divider"></div>
+    <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)">↩ Déconnexion</a>
+  </div>
+
+  <div class="main">
+    <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h2 style="font-size:18px;font-weight:500">Gestion des offres</h2>
+        <p style="font-size:13px;color:#666;margin-top:2px">{{ offres|length }} offre{{ 's' if offres|length != 1 }}</p>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <a href="{{ url_for('admin.offres') }}" class="filter-chip {% if not statut_filtre %}active{% endif %}" style="text-decoration:none">Toutes</a>
+      <a href="{{ url_for('admin.offres') }}?statut=active" class="filter-chip {% if statut_filtre == 'active' %}active{% endif %}" style="text-decoration:none">Actives</a>
+      <a href="{{ url_for('admin.offres') }}?statut=fermee" class="filter-chip {% if statut_filtre == 'fermee' %}active{% endif %}" style="text-decoration:none">Fermées</a>
+    </div>
+
+    {% if offres %}
+    <div class="card" style="padding:0;overflow:hidden">
+      {% for offre in offres %}
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);{% if loop.last %}border-bottom:none{% endif %}">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div class="cand-avatar" style="background:var(--green-light);color:var(--green-dark);flex-shrink:0">{{ offre.entreprise.initiales }}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">
+              <div style="font-size:13px;font-weight:500">{{ offre.titre }}</div>
+              {% if offre.active %}
+              <span style="font-size:10px;background:var(--green-light);color:var(--green-dark);padding:2px 7px;border-radius:4px">● Active</span>
+              {% else %}
+              <span style="font-size:10px;background:var(--gray-100);color:var(--gray-500);padding:2px 7px;border-radius:4px">● Fermée</span>
+              {% endif %}
+            </div>
+            <div style="font-size:11px;color:var(--gray-500);margin-bottom:4px">
+              <strong>{{ offre.entreprise.nom }}</strong> · {{ offre.filiere_requise }} · {{ offre.ville }} · {{ offre.duree }} mois
+            </div>
+            <div class="tags">
+              {% for c in offre.competences[:3] %}
+              <span class="tag">{{ c.nom }}</span>
+              {% endfor %}
+              {% if offre.competences|length > 3 %}
+              <span class="tag">+{{ offre.competences|length - 3 }}</span>
+              {% endif %}
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:16px;font-weight:600;color:var(--primary)">{{ offre.nb_candidatures }}</div>
+            <div style="font-size:10px;color:var(--gray-400);margin-bottom:10px">candidature{{ 's' if offre.nb_candidatures != 1 }}</div>
+            <form method="POST" action="{{ url_for('admin.supprimer_offre', offre_id=offre.id) }}" style="display:inline" onsubmit="return confirm('Supprimer définitivement cette offre et ses candidatures ?')">
+              <button type="submit" class="btn btn-xs" style="background:var(--red-light);color:var(--red-dark);border:1px solid #FCA5A5">🗑 Supprimer</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:48px 20px;color:var(--gray-500)">
+      <div style="font-size:32px;margin-bottom:12px">📋</div>
+      <div style="font-size:14px;font-weight:500">Aucune offre trouvée</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

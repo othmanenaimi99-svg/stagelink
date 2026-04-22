@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% block title %}StageLink MA — {{ 'Connexion' if tab == 'login' else 'Inscription' }}{% endblock %}
+{% block body %}
+<div class="auth-page">
+  <div class="auth-left">
+    <div>
+      <div class="auth-logo">Stage<span>Link</span> MA</div>
+      <div class="auth-hero">
+        <h2>La plateforme de stages pensée pour vous</h2>
+        <p>Trouvez votre stage grâce à un algorithme de matching intelligent.</p>
+        <div class="auth-points">
+          <div class="auth-point"><div class="auth-point-icon">✓</div>Score de matching personnalisé pour chaque offre</div>
+          <div class="auth-point"><div class="auth-point-icon">✓</div>Convention de stage générée automatiquement en PDF</div>
+          <div class="auth-point"><div class="auth-point-icon">✓</div>Feedback obligatoire après chaque refus</div>
+          <div class="auth-point"><div class="auth-point-icon">✓</div>Entreprises vérifiées — aucune fausse offre</div>
+        </div>
+      </div>
+    </div>
+    <div class="auth-footer">© 2025 StageLink MA · Toutes les universités du Maroc</div>
+  </div>
+
+  <div class="auth-right">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}" style="margin-bottom:10px">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="auth-tabs">
+      <a href="{{ url_for('auth.login') }}" class="auth-tab {% if tab == 'login' %}active{% endif %}">Connexion</a>
+      <a href="{{ url_for('auth.register_step1') }}" class="auth-tab {% if tab == 'register' %}active{% endif %}">S'inscrire</a>
+    </div>
+
+    {% if tab == 'login' %}
+    <h2 style="font-size:18px;font-weight:500;margin-bottom:4px">Bon retour</h2>
+    <p style="font-size:12px;color:var(--gray-500);margin-bottom:18px">Connectez-vous à votre compte StageLink MA</p>
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      <div class="form-group">
+        <label class="form-label">Adresse email</label>
+        <input type="email" name="email" class="form-control" placeholder="votre@email.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Se connecter</button>
+    </form>
+    <div style="text-align:center;font-size:12px;color:var(--gray-500);margin-top:14px">
+      Pas encore de compte ? <a href="{{ url_for('auth.register_step1') }}" style="color:var(--primary)">S'inscrire gratuitement</a>
+    </div>
+
+    {% elif tab == 'register' %}
+
+      {# STEP INDICATOR #}
+      <div class="step-indicator">
+        {% for i in range(1, 5) %}
+          <div class="step-dot {% if i < step %}done{% elif i == step %}current{% else %}todo{% endif %}">{{ i }}</div>
+          {% if i < 4 %}<div class="step-line {% if i < step %}done{% endif %}"></div>{% endif %}
+        {% endfor %}
+      </div>
+
+      {% if step == 1 %}
+      <div style="font-size:12px;font-weight:500;margin-bottom:10px;color:var(--gray-500)">Étape 1 — Informations de compte</div>
+      <form method="POST" action="{{ url_for('auth.register_step1') }}">
+        <div class="form-group">
+          <label class="form-label">Nom complet *</label>
+          <input type="text" name="nom" class="form-control" placeholder="Prénom Nom" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Adresse email *</label>
+          <input type="email" name="email" class="form-control" placeholder="votre@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mot de passe * <span style="font-size:10px;color:var(--gray-500)">(min. 6 caractères)</span></label>
+          <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Je suis *</label>
+          <div class="role-cards">
+            <label class="role-card selected" id="card-etudiant">
+              <input type="radio" name="role" value="ETUDIANT" checked>
+              👤 Étudiant
+            </label>
+            <label class="role-card" id="card-entreprise">
+              <input type="radio" name="role" value="ENTREPRISE">
+              🏢 Entreprise
+            </label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Continuer →</button>
+      </form>
+
+      {% elif step == 2 %}
+      <div style="font-size:12px;font-weight:500;margin-bottom:10px;color:var(--gray-500)">
+        Étape 2 — {% if data.role == 'ETUDIANT' %}Informations académiques{% else %}Informations entreprise{% endif %}
+      </div>
+      <form method="POST" action="{{ url_for('auth.register_step2') }}">
+        {% if data.role == 'ETUDIANT' %}
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Université *</label>
+            <select name="universite" class="form-control form-control-sm" required>
+              <option value="">-- Choisir --</option>
+              {% for u in ['ENCG Marrakech','ENCG Casablanca','ENCG Agadir','ENCG Fès','FSJES Marrakech','FSJES Casablanca','ISCAE','ENCG Oujda','ENSA Marrakech','EST Casablanca','Université Hassan II','Université Cadi Ayyad','Autre'] %}
+              <option value="{{ u }}">{{ u }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Filière *</label>
+            <select name="filiere" class="form-control form-control-sm" required>
+              <option value="">-- Choisir --</option>
+              {% for f in ['Finance','Marketing','Gestion','Informatique','Logistique','RH','Commerce','Comptabilité','Audit','Économie'] %}
+              <option value="{{ f }}">{{ f }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Niveau *</label>
+            <select name="niveau" class="form-control form-control-sm" required>
+              <option value="L1">L1</option><option value="L2">L2</option>
+              <option value="L3" selected>L3 / S6</option>
+              <option value="S6">S6</option><option value="M1">M1</option><option value="M2">M2</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ville *</label>
+            <select name="ville" class="form-control form-control-sm" required>
+              {% for v in ['Marrakech','Casablanca','Rabat','Agadir','Fès','Tanger','Meknès','Oujda','Khouribga','Autre'] %}
+              <option value="{{ v }}">{{ v }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        {% else %}
+        <div class="form-group">
+          <label class="form-label">Secteur d'activité *</label>
+          <select name="secteur" class="form-control form-control-sm" required>
+            {% for s in ['Banque & Finance','Grande distribution','Industrie minière','Énergie','Agroalimentaire','Télécommunications','Automobile','Pharmacie','Logistique','Conseil','Technologie','Autre'] %}
+            <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Ville *</label>
+            <select name="ville" class="form-control form-control-sm" required>
+              {% for v in ['Marrakech','Casablanca','Rabat','Agadir','Fès','Tanger','Khouribga','Autre'] %}
+              <option value="{{ v }}">{{ v }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Taille *</label>
+            <select name="taille" class="form-control form-control-sm" required>
+              <option value="TPE">TPE (&lt; 10 employés)</option>
+              <option value="PME">PME (10–250)</option>
+              <option value="GE" selected>Grande entreprise</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">N° RC / Registre de commerce</label>
+          <input type="text" name="rc" class="form-control form-control-sm" placeholder="RC-XXXX-000">
+        </div>
+        {% endif %}
+        <div style="display:flex;gap:8px">
+          <a href="{{ url_for('auth.register_step1') }}" class="btn btn-secondary" style="flex:1;justify-content:center;padding:9px;font-size:12px">Retour</a>
+          <button type="submit" class="btn btn-primary" style="flex:2;justify-content:center;padding:9px;font-size:12px">Continuer →</button>
+        </div>
+      </form>
+
+      {% elif step == 3 %}
+      <div style="font-size:12px;font-weight:500;margin-bottom:10px;color:var(--gray-500)">
+        Étape 3 — {% if data.role == 'ETUDIANT' %}Compétences{% else %}Description{% endif %}
+      </div>
+      <form method="POST" action="{{ url_for('auth.register_step3') }}">
+        {% if data.role == 'ETUDIANT' %}
+        <div class="form-group">
+          <label class="form-label">Sélectionnez vos compétences</label>
+          <div class="competence-checkbox-grid" id="comp-grid">
+            {% for comp in competences %}
+            <label class="comp-chip" onclick="toggleChip(this)">
+              <input type="checkbox" name="competences" value="{{ comp.id }}">
+              {{ comp.nom }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
+        <div class="form-group">
+          <label class="form-label">Description de l'entreprise *</label>
+          <textarea name="description" class="form-control" rows="5" placeholder="Décrivez votre entreprise, vos activités..."></textarea>
+        </div>
+        {% endif %}
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <a href="{{ url_for('auth.register_step2') }}" class="btn btn-secondary" style="flex:1;justify-content:center;padding:9px;font-size:12px">Retour</a>
+          <button type="submit" class="btn btn-primary" style="flex:2;justify-content:center;padding:9px;font-size:12px">Continuer →</button>
+        </div>
+      </form>
+
+      {% elif step == 4 %}
+      <div style="font-size:12px;font-weight:500;margin-bottom:10px;color:var(--gray-500)">
+        Étape 4 — {% if data.role == 'ETUDIANT' %}CV & Confirmation{% else %}Confirmation{% endif %}
+      </div>
+      <form method="POST" action="{{ url_for('auth.register_step4') }}" enctype="multipart/form-data">
+        {% if data.role == 'ETUDIANT' %}
+        <div class="form-group">
+          <label class="form-label">Uploader votre CV (PDF)</label>
+          <input type="file" name="cv" class="form-control form-control-sm" accept=".pdf">
+        </div>
+        {% endif %}
+        <div style="background:var(--gray-50);border-radius:var(--radius-md);padding:12px;margin-bottom:14px;font-size:12px">
+          <div style="font-weight:500;margin-bottom:6px">Récapitulatif</div>
+          <div style="color:var(--gray-500)">{{ data.nom }}</div>
+          <div style="color:var(--gray-500)">{{ data.email }}</div>
+          {% if data.role == 'ETUDIANT' %}
+          <div style="color:var(--gray-500)">{{ data.get('filiere','') }} · {{ data.get('niveau','') }} · {{ data.get('universite','') }}</div>
+          {% else %}
+          <div style="color:var(--gray-500)">{{ data.get('secteur','') }} · {{ data.get('ville','') }}</div>
+          {% endif %}
+        </div>
+        <div style="display:flex;gap:8px">
+          <a href="{{ url_for('auth.register_step3') }}" class="btn btn-secondary" style="flex:1;justify-content:center;padding:9px;font-size:12px">Retour</a>
+          <button type="submit" class="btn btn-primary" style="flex:2;justify-content:center;padding:9px;font-size:12px">Créer mon compte</button>
+        </div>
+      </form>
+      {% endif %}
+
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function toggleChip(el) {
+  const cb = el.querySelector('input');
+  cb.checked = !cb.checked;
+  el.classList.toggle('checked', cb.checked);
+}
+document.querySelectorAll('.role-card').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    card.querySelector('input').checked = true;
+  });
+});
+</script>
+{% endblock %}

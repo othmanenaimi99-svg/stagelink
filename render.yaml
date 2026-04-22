@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: stagelink-ma
+    env: python
+    buildCommand: pip install -r requirements.txt && python seed_db.py
+    startCommand: gunicorn app:create_app()

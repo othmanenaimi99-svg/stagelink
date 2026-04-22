@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}Mon profil entreprise — StageLink MA{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="topbar-right">
+    <div class="avatar" style="background:var(--green-light);color:var(--green-dark)">{{ entreprise.initiales }}</div>
+    <span style="font-size:13px;color:#666">{{ entreprise.nom }}</span>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-container"><div class="flash flash-{{ category }}">{{ message }}</div></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="body-layout">
+  <div class="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar avatar-lg" style="background:var(--green-light);color:var(--green-dark);margin-bottom:8px">{{ entreprise.initiales }}</div>
+      <div class="sidebar-profile-name">{{ entreprise.nom }}</div>
+      <div class="sidebar-profile-sub">{{ entreprise.secteur }} · {{ entreprise.ville }}</div>
+    </div>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Navigation</span>
+    <a href="{{ url_for('entreprise.dashboard') }}" class="sid-item">◆ Tableau de bord</a>
+    <a href="{{ url_for('entreprise.candidatures') }}" class="sid-item">📁 Candidatures <span class="sid-badge sid-badge-red">{{ entreprise.nb_candidatures_en_attente }}</span></a>
+    <a href="{{ url_for('entreprise.offres') }}" class="sid-item">📋 Mes offres</a>
+    <a href="{{ url_for('entreprise.profil') }}" class="sid-item active">🏢 Mon profil</a>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Actions</span>
+    <a href="{{ url_for('entreprise.nouvelle_offre') }}" class="sid-item">+ Nouvelle offre</a>
+    <div class="sid-divider"></div>
+    <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)">↩ Déconnexion</a>
+  </div>
+
+  <div class="main">
+    <div style="margin-bottom:18px">
+      <h2 style="font-size:18px;font-weight:500">Profil entreprise</h2>
+      <p style="font-size:13px;color:#666;margin-top:2px">Ces informations sont visibles par les étudiants sur vos offres</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 260px;gap:14px;align-items:start">
+      <form method="POST" action="{{ url_for('entreprise.profil') }}">
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-title">Informations de l'entreprise</div>
+          <div class="form-group">
+            <label class="form-label">Nom de l'entreprise *</label>
+            <input type="text" name="nom" class="form-control" value="{{ entreprise.utilisateur.nom }}" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Secteur d'activité *</label>
+              <select name="secteur" class="form-control form-control-sm" required>
+                {% for s in ['Banque & Finance','Grande distribution','Industrie minière','Énergie','Agroalimentaire','Télécommunications','Automobile','Pharmacie','Logistique','Conseil','Technologie','Autre'] %}
+                <option value="{{ s }}" {% if entreprise.secteur == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Taille *</label>
+              <select name="taille" class="form-control form-control-sm" required>
+                <option value="TPE" {% if entreprise.taille == 'TPE' %}selected{% endif %}>TPE (&lt; 10 employés)</option>
+                <option value="PME" {% if entreprise.taille == 'PME' %}selected{% endif %}>PME (10–250)</option>
+                <option value="GE" {% if entreprise.taille == 'GE' %}selected{% endif %}>Grande entreprise</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Ville *</label>
+              <select name="ville" class="form-control form-control-sm" required>
+                {% for v in ['Marrakech','Casablanca','Rabat','Agadir','Fès','Tanger','Khouribga','Autre'] %}
+                <option value="{{ v }}" {% if entreprise.ville == v %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">N° RC <span style="font-size:10px;color:var(--gray-400)">optionnel</span></label>
+              <input type="text" name="rc" class="form-control form-control-sm" value="{{ entreprise.rc or '' }}" placeholder="RC-XXXX-000">
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-title">Description</div>
+          <div class="form-group">
+            <label class="form-label">Description de l'entreprise *</label>
+            <textarea name="description" class="form-control" rows="5" style="font-size:12px;line-height:1.6" placeholder="Décrivez votre entreprise, vos activités, votre culture...">{{ entreprise.description or '' }}</textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="font-size:13px;padding:10px 24px">Enregistrer les modifications</button>
+      </form>
+
+      <div style="position:sticky;top:16px">
+        <div class="card">
+          <div style="font-size:13px;font-weight:500;margin-bottom:10px">Statut du compte</div>
+          {% if entreprise.verifie %}
+          <div style="background:var(--green-light);border-radius:8px;padding:10px;font-size:12px;color:var(--green-dark)">
+            <div style="font-weight:600;margin-bottom:4px">✓ Entreprise vérifiée</div>
+            <div>Votre badge "Entreprise vérifiée" est visible par tous les étudiants.</div>
+          </div>
+          {% else %}
+          <div style="background:#FEF3C7;border-radius:8px;padding:10px;font-size:12px;color:#78350F">
+            <div style="font-weight:600;margin-bottom:4px">⏳ En attente de vérification</div>
+            <div>Notre équipe examine votre profil. Vous serez notifié par email dès validation.</div>
+          </div>
+          {% endif %}
+
+          <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+            <div style="font-size:12px;color:var(--gray-600);margin-bottom:2px">Email</div>
+            <div style="font-size:12px;font-weight:500">{{ entreprise.utilisateur.email }}</div>
+          </div>
+          <div style="margin-top:10px">
+            <div style="font-size:12px;color:var(--gray-600);margin-bottom:2px">Offres publiées</div>
+            <div style="font-size:12px;font-weight:500">{{ entreprise.offres|length }}</div>
+          </div>
+          <div style="margin-top:10px">
+            <div style="font-size:12px;color:var(--gray-600);margin-bottom:2px">Taux d'acceptation</div>
+            <div style="font-size:12px;font-weight:500;color:var(--green)">{{ entreprise.taux_acceptation }}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

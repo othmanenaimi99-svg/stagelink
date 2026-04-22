@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}Utilisateurs — Administration StageLink MA{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="topbar-right">
+    <div class="avatar" style="background:#7C3AED;color:#fff">A</div>
+    <span style="font-size:13px;color:#666">Administrateur</span>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-container"><div class="flash flash-{{ category }}">{{ message }}</div></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="body-layout">
+  <div class="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar avatar-lg" style="background:#7C3AED;color:#fff;margin-bottom:8px">A</div>
+      <div class="sidebar-profile-name">Administration</div>
+      <div class="sidebar-profile-sub">StageLink MA</div>
+    </div>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Administration</span>
+    <a href="{{ url_for('admin.dashboard') }}" class="sid-item">◆ Tableau de bord</a>
+    <a href="{{ url_for('admin.entreprises') }}" class="sid-item">🏢 Entreprises</a>
+    <a href="{{ url_for('admin.utilisateurs') }}" class="sid-item active">👥 Utilisateurs</a>
+    <a href="{{ url_for('admin.offres') }}" class="sid-item">📋 Offres</a>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Export</span>
+    <a href="{{ url_for('admin.export_pdf') }}" class="sid-item">📊 Rapport PDF</a>
+    <div class="sid-divider"></div>
+    <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)">↩ Déconnexion</a>
+  </div>
+
+  <div class="main">
+    <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <h2 style="font-size:18px;font-weight:500">Gestion des utilisateurs</h2>
+        <p style="font-size:13px;color:#666;margin-top:2px">{{ utilisateurs|length }} utilisateur{{ 's' if utilisateurs|length != 1 }}</p>
+      </div>
+    </div>
+
+    <form method="GET" action="{{ url_for('admin.utilisateurs') }}" style="margin-bottom:14px;display:flex;gap:10px;align-items:center">
+      <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Rechercher par nom ou email..." class="form-control" style="font-size:12px;max-width:300px">
+      <select name="role" class="form-control form-control-sm" style="width:140px" onchange="this.form.submit()">
+        <option value="">Tous les rôles</option>
+        <option value="ETUDIANT" {% if role_filtre == 'ETUDIANT' %}selected{% endif %}>Étudiants</option>
+        <option value="ENTREPRISE" {% if role_filtre == 'ENTREPRISE' %}selected{% endif %}>Entreprises</option>
+      </select>
+      <button type="submit" class="btn btn-secondary btn-sm">Rechercher</button>
+      {% if search_query or role_filtre %}
+      <a href="{{ url_for('admin.utilisateurs') }}" class="btn btn-secondary btn-sm">✕ Réinitialiser</a>
+      {% endif %}
+    </form>
+
+    {% if utilisateurs %}
+    <div class="card" style="padding:0;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="background:var(--gray-50);border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:10px 14px;font-weight:500;color:var(--gray-500)">Utilisateur</th>
+            <th style="text-align:left;padding:10px 8px;font-weight:500;color:var(--gray-500)">Email</th>
+            <th style="text-align:left;padding:10px 8px;font-weight:500;color:var(--gray-500)">Rôle</th>
+            <th style="text-align:left;padding:10px 8px;font-weight:500;color:var(--gray-500)">Détails</th>
+            <th style="text-align:left;padding:10px 8px;font-weight:500;color:var(--gray-500)">Statut</th>
+            <th style="text-align:right;padding:10px 14px;font-weight:500;color:var(--gray-500)">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in utilisateurs %}
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px 14px">
+              <div style="font-weight:500;color:var(--gray-800)">{{ u.nom }}</div>
+            </td>
+            <td style="padding:10px 8px;color:var(--gray-500)">{{ u.email }}</td>
+            <td style="padding:10px 8px">
+              <span style="font-size:10px;padding:2px 7px;border-radius:4px;{% if u.role == 'ETUDIANT' %}background:var(--primary-light);color:var(--primary-dark){% elif u.role == 'ENTREPRISE' %}background:var(--green-light);color:var(--green-dark){% else %}background:#EDE9FE;color:#5B21B6{% endif %}">{{ u.role }}</span>
+            </td>
+            <td style="padding:10px 8px;color:var(--gray-500);font-size:11px">
+              {% if u.etudiant %}
+              {{ u.etudiant.filiere }} · {{ u.etudiant.niveau }} · {{ u.etudiant.universite }}
+              {% elif u.entreprise %}
+              {{ u.entreprise.secteur }} · {{ u.entreprise.ville }}
+              {% if u.entreprise.verifie %}<span style="color:var(--green-dark)"> · ✓</span>{% endif %}
+              {% endif %}
+            </td>
+            <td style="padding:10px 8px">
+              {% if u.actif %}
+              <span style="font-size:11px;color:var(--green-dark)">● Actif</span>
+              {% else %}
+              <span style="font-size:11px;color:var(--red-dark)">● Suspendu</span>
+              {% endif %}
+            </td>
+            <td style="padding:10px 14px;text-align:right">
+              {% if u.role != 'ADMIN' %}
+              <form method="POST" action="{{ url_for('admin.suspendre_utilisateur', utilisateur_id=u.id) }}" style="display:inline" onsubmit="return confirm('{{ 'Réactiver' if not u.actif else 'Suspendre' }} ce compte ?')">
+                <button type="submit" class="btn btn-xs" style="{% if u.actif %}background:var(--red-light);color:var(--red-dark);border:1px solid #FCA5A5{% else %}background:var(--green-light);color:var(--green-dark);border:1px solid #6EE7B7{% endif %}">
+                  {{ '▶ Réactiver' if not u.actif else '⏸ Suspendre' }}
+                </button>
+              </form>
+              {% else %}
+              <span style="font-size:11px;color:var(--gray-400)">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:48px 20px;color:var(--gray-500)">
+      <div style="font-size:32px;margin-bottom:12px">👥</div>
+      <div style="font-size:14px;font-weight:500">Aucun utilisateur trouvé</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

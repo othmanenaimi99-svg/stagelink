@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% block title %}Mon profil — StageLink MA{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="topbar-search">
+    <form action="{{ url_for('etudiant.offres') }}" method="GET">
+      <input type="text" name="q" placeholder="Rechercher..." class="form-control" style="font-size:12px;padding:7px 12px">
+    </form>
+  </div>
+  <div class="topbar-right">
+    <a href="{{ url_for('etudiant.marquer_notifications_lues') }}" class="notif-btn">
+      🔔{% if notif_count > 0 %}<span class="notif-dot"></span>{% endif %}
+    </a>
+    <div class="avatar">{{ etudiant.initiales }}</div>
+    <span style="font-size:13px;color:#666">{{ etudiant.nom_complet.split()[0] }} {{ etudiant.nom_complet.split()[-1][0] if etudiant.nom_complet.split()|length > 1 else '' }}.</span>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-container"><div class="flash flash-{{ category }}">{{ message }}</div></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="body-layout">
+  <div class="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar avatar-lg" style="margin-bottom:8px">{{ etudiant.initiales }}</div>
+      <div class="sidebar-profile-name">{{ etudiant.nom_complet }}</div>
+      <div class="sidebar-profile-sub">{{ etudiant.filiere }} · {{ etudiant.niveau }} · {{ etudiant.universite }}</div>
+      <div class="profile-bar-wrap">
+        <div class="profile-bar-label"><span>Profil complété</span><span>{{ etudiant.completion_profil }}%</span></div>
+        <div class="profile-bar"><div class="profile-bar-fill" style="width:{{ etudiant.completion_profil }}%"></div></div>
+      </div>
+    </div>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Navigation</span>
+    <a href="{{ url_for('etudiant.dashboard') }}" class="sid-item">◆ Tableau de bord</a>
+    <a href="{{ url_for('etudiant.offres') }}" class="sid-item">📋 Offres</a>
+    <a href="{{ url_for('etudiant.candidatures') }}" class="sid-item">📁 Mes candidatures</a>
+    <a href="{{ url_for('etudiant.profil') }}" class="sid-item active">👤 Mon profil</a>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Raccourcis</span>
+    <a href="{{ url_for('etudiant.offres') }}" class="sid-item">⭐ Top matchs</a>
+    <a href="{{ url_for('etudiant.candidatures') }}?statut=REFUSEE" class="sid-item">💬 Feedbacks reçus</a>
+    <div class="sid-divider"></div>
+    <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)">↩ Déconnexion</a>
+  </div>
+
+  <div class="main">
+    <div style="margin-bottom:18px">
+      <h2 style="font-size:18px;font-weight:500">Mon profil</h2>
+      <p style="font-size:13px;color:#666;margin-top:2px">Complétez votre profil pour améliorer votre score de matching</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 280px;gap:14px;align-items:start">
+      <div>
+        <form method="POST" action="{{ url_for('etudiant.profil') }}" enctype="multipart/form-data">
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-title">Informations personnelles</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Nom complet *</label>
+                <input type="text" name="nom" class="form-control" value="{{ etudiant.utilisateur.nom }}" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" value="{{ etudiant.utilisateur.email }}" disabled style="background:var(--gray-50);color:var(--gray-500)">
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-title">Informations académiques</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Université *</label>
+                <select name="universite" class="form-control form-control-sm" required>
+                  {% for u in ['ENCG Marrakech','ENCG Casablanca','ENCG Agadir','ENCG Fès','FSJES Marrakech','FSJES Casablanca','ISCAE','ENCG Oujda','ENSA Marrakech','EST Casablanca','Université Hassan II','Université Cadi Ayyad','Autre'] %}
+                  <option value="{{ u }}" {% if etudiant.universite == u %}selected{% endif %}>{{ u }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Filière *</label>
+                <select name="filiere" class="form-control form-control-sm" required>
+                  {% for f in ['Finance','Marketing','Gestion','Informatique','Logistique','RH','Commerce','Comptabilité','Audit','Économie'] %}
+                  <option value="{{ f }}" {% if etudiant.filiere == f %}selected{% endif %}>{{ f }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Niveau *</label>
+                <select name="niveau" class="form-control form-control-sm" required>
+                  {% for n in ['L1','L2','L3','S6','M1','M2'] %}
+                  <option value="{{ n }}" {% if etudiant.niveau == n %}selected{% endif %}>{{ n }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ville *</label>
+                <select name="ville" class="form-control form-control-sm" required>
+                  {% for v in ['Marrakech','Casablanca','Rabat','Agadir','Fès','Tanger','Meknès','Oujda','Khouribga','Autre'] %}
+                  <option value="{{ v }}" {% if etudiant.ville == v %}selected{% endif %}>{{ v }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-title">Compétences</div>
+            <p style="font-size:12px;color:var(--gray-500);margin-bottom:10px">Sélectionnez toutes vos compétences. Elles impactent directement votre score de matching.</p>
+            <div class="competence-checkbox-grid" id="comp-grid">
+              {% for comp in toutes_competences %}
+              <label class="comp-chip {% if comp in etudiant.competences %}checked{% endif %}" onclick="toggleChip(this)">
+                <input type="checkbox" name="competences" value="{{ comp.id }}" {% if comp in etudiant.competences %}checked{% endif %}>
+                {{ comp.nom }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-title">CV</div>
+            {% if etudiant.cv_path %}
+            <div style="display:flex;align-items:center;gap:10px;background:var(--green-light);border-radius:8px;padding:10px;margin-bottom:10px">
+              <span style="font-size:20px">📄</span>
+              <div style="flex:1">
+                <div style="font-size:12px;font-weight:500;color:var(--green-dark)">CV uploadé</div>
+                <div style="font-size:10px;color:var(--gray-500)">{{ etudiant.cv_path.split('/')[-1] }}</div>
+              </div>
+            </div>
+            <p style="font-size:11px;color:var(--gray-500);margin-bottom:8px">Uploader un nouveau fichier remplacera l'ancien.</p>
+            {% else %}
+            <div style="background:var(--red-light);border:1px dashed #FCA5A5;border-radius:8px;padding:12px;text-align:center;margin-bottom:10px">
+              <div style="font-size:12px;color:var(--red-dark);font-weight:500">Aucun CV uploadé</div>
+              <div style="font-size:11px;color:var(--gray-500);margin-top:2px">Le CV est requis pour postuler aux offres</div>
+            </div>
+            {% endif %}
+            <div class="form-group">
+              <label class="form-label">Uploader votre CV (PDF, max 5 Mo)</label>
+              <input type="file" name="cv" class="form-control form-control-sm" accept=".pdf">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="font-size:13px;padding:10px 24px">Enregistrer les modifications</button>
+        </form>
+      </div>
+
+      <div style="position:sticky;top:16px">
+        <div class="card" style="margin-bottom:12px">
+          <div style="font-size:13px;font-weight:500;margin-bottom:10px">Complétion du profil</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div class="avatar avatar-lg">{{ etudiant.initiales }}</div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:{% if etudiant.completion_profil >= 80 %}var(--primary){% elif etudiant.completion_profil >= 60 %}var(--green){% else %}var(--orange){% endif %}">{{ etudiant.completion_profil }}%</div>
+              <div style="font-size:11px;color:var(--gray-500)">{% if etudiant.completion_profil == 100 %}Profil complet !{% elif etudiant.completion_profil >= 80 %}Très bon profil{% elif etudiant.completion_profil >= 60 %}Bon profil{% else %}Profil incomplet{% endif %}</div>
+            </div>
+          </div>
+          <div class="profile-bar" style="margin-bottom:14px">
+            <div class="profile-bar-fill" style="width:{{ etudiant.completion_profil }}%"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+            <div style="display:flex;align-items:center;gap:8px;color:var(--green-dark)">
+              <span>✓</span><span>Informations de compte</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;color:var(--green-dark)">
+              <span>✓</span><span>Informations académiques</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;color:{% if etudiant.competences %}var(--green-dark){% else %}var(--red-dark){% endif %}">
+              <span>{% if etudiant.competences %}✓{% else %}✗{% endif %}</span><span>Compétences</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;color:{% if etudiant.cv_path %}var(--green-dark){% else %}var(--red-dark){% endif %}">
+              <span>{% if etudiant.cv_path %}✓{% else %}✗{% endif %}</span><span>CV (PDF)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="font-size:12px;color:var(--gray-600)">
+          <div style="font-weight:500;font-size:13px;margin-bottom:6px">💡 Conseils</div>
+          <ul style="margin:0;padding-left:16px;line-height:1.8">
+            <li>Un profil complet augmente votre score de matching</li>
+            <li>Ajoutez toutes vos compétences acquises</li>
+            <li>Votre CV doit être au format PDF</li>
+            <li>Votre ville influence le matching géographique</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleChip(el) {
+  const cb = el.querySelector('input');
+  cb.checked = !cb.checked;
+  el.classList.toggle('checked', cb.checked);
+}
+</script>
+{% endblock %}

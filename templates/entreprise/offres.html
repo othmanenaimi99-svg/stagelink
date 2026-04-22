@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Mes offres — StageLink MA{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="topbar-right">
+    <div class="avatar" style="background:var(--green-light);color:var(--green-dark)">{{ entreprise.initiales }}</div>
+    <span style="font-size:13px;color:#666">{{ entreprise.nom }}</span>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-container"><div class="flash flash-{{ category }}">{{ message }}</div></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="body-layout">
+  <div class="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar avatar-lg" style="background:var(--green-light);color:var(--green-dark);margin-bottom:8px">{{ entreprise.initiales }}</div>
+      <div class="sidebar-profile-name">{{ entreprise.nom }}</div>
+      <div class="sidebar-profile-sub">{{ entreprise.secteur }} · {{ entreprise.ville }}</div>
+    </div>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Navigation</span>
+    <a href="{{ url_for('entreprise.dashboard') }}" class="sid-item">◆ Tableau de bord</a>
+    <a href="{{ url_for('entreprise.candidatures') }}" class="sid-item">📁 Candidatures <span class="sid-badge sid-badge-red">{{ entreprise.nb_candidatures_en_attente }}</span></a>
+    <a href="{{ url_for('entreprise.offres') }}" class="sid-item active">📋 Mes offres</a>
+    <a href="{{ url_for('entreprise.profil') }}" class="sid-item">🏢 Mon profil</a>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Actions</span>
+    <a href="{{ url_for('entreprise.nouvelle_offre') }}" class="sid-item">+ Nouvelle offre</a>
+    <div class="sid-divider"></div>
+    <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)">↩ Déconnexion</a>
+  </div>
+
+  <div class="main">
+    <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h2 style="font-size:18px;font-weight:500">Mes offres de stage</h2>
+        <p style="font-size:13px;color:#666;margin-top:2px">{{ offres|length }} offre{{ 's' if offres|length != 1 }} publiée{{ 's' if offres|length != 1 }}</p>
+      </div>
+      <a href="{{ url_for('entreprise.nouvelle_offre') }}" class="btn btn-primary btn-sm">+ Nouvelle offre</a>
+    </div>
+
+    {% if offres %}
+    <div class="card" style="padding:0;overflow:hidden">
+      {% for offre in offres %}
+      <div style="padding:16px;border-bottom:1px solid var(--border);{% if loop.last %}border-bottom:none{% endif %}">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap">
+              <div style="font-size:13px;font-weight:500">{{ offre.titre }}</div>
+              {% if offre.active %}
+              <span style="font-size:10px;background:var(--green-light);color:var(--green-dark);padding:2px 7px;border-radius:4px">● Active</span>
+              {% else %}
+              <span style="font-size:10px;background:var(--gray-100);color:var(--gray-500);padding:2px 7px;border-radius:4px">● Fermée</span>
+              {% endif %}
+            </div>
+            <div style="font-size:12px;color:var(--gray-500);margin-bottom:6px">
+              {{ offre.filiere_requise }} · {{ offre.ville }} · {{ offre.duree }} mois
+              {% if offre.remuneration %} · {{ offre.remuneration }} MAD{% endif %}
+            </div>
+            <div class="tags">
+              {% for c in offre.competences[:4] %}
+              <span class="tag">{{ c.nom }}</span>
+              {% endfor %}
+              {% if offre.competences|length > 4 %}
+              <span class="tag">+{{ offre.competences|length - 4 }}</span>
+              {% endif %}
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:18px;font-weight:600;color:var(--primary)">{{ offre.nb_candidatures }}</div>
+            <div style="font-size:10px;color:var(--gray-400)">candidature{{ 's' if offre.nb_candidatures != 1 }}</div>
+            <div style="margin-top:8px;display:flex;gap:6px;justify-content:flex-end">
+              <a href="{{ url_for('entreprise.candidatures') }}?offre_id={{ offre.id }}" class="btn btn-secondary btn-xs">Candidatures</a>
+              {% if offre.active %}
+              <form method="POST" action="{{ url_for('entreprise.fermer_offre', offre_id=offre.id) }}" style="display:inline" onsubmit="return confirm('Fermer cette offre ?')">
+                <button type="submit" class="btn btn-xs" style="background:var(--red-light);color:var(--red-dark);border:1px solid #FCA5A5">Fermer</button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:48px 20px;color:var(--gray-500)">
+      <div style="font-size:32px;margin-bottom:12px">📋</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:6px">Aucune offre publiée</div>
+      <div style="font-size:12px;margin-bottom:14px">Publiez votre première offre de stage pour commencer à recevoir des candidatures.</div>
+      <a href="{{ url_for('entreprise.nouvelle_offre') }}" class="btn btn-primary btn-sm">Publier une offre</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}Administration — StageLink MA{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="topbar-right">
+    <div class="avatar" style="background:#7C3AED;color:#fff">A</div>
+    <span style="font-size:13px;color:#666">Administrateur</span>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-container"><div class="flash flash-{{ category }}">{{ message }}</div></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="body-layout">
+  <div class="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar avatar-lg" style="background:#7C3AED;color:#fff;margin-bottom:8px">A</div>
+      <div class="sidebar-profile-name">Administration</div>
+      <div class="sidebar-profile-sub">StageLink MA</div>
+    </div>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Administration</span>
+    <a href="{{ url_for('admin.dashboard') }}" class="sid-item active">◆ Tableau de bord</a>
+    <a href="{{ url_for('admin.entreprises') }}" class="sid-item">🏢 Entreprises <span class="sid-badge sid-badge-red">{{ stats.entreprises_en_attente }}</span></a>
+    <a href="{{ url_for('admin.utilisateurs') }}" class="sid-item">👥 Utilisateurs</a>
+    <a href="{{ url_for('admin.offres') }}" class="sid-item">📋 Offres</a>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Export</span>
+    <a href="{{ url_for('admin.export_pdf') }}" class="sid-item">📊 Rapport PDF</a>
+    <div class="sid-divider"></div>
+    <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)">↩ Déconnexion</a>
+  </div>
+
+  <div class="main">
+    <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h2 style="font-size:18px;font-weight:500">Tableau de bord administrateur</h2>
+        <p style="font-size:13px;color:#666;margin-top:2px">Vue d'ensemble de la plateforme StageLink MA</p>
+      </div>
+      <a href="{{ url_for('admin.export_pdf') }}" class="btn btn-secondary btn-sm" style="font-size:12px">📊 Exporter rapport</a>
+    </div>
+
+    <div class="metrics-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:16px">
+      <div class="metric"><div class="metric-label">Étudiants</div><div class="metric-val blue">{{ stats.nb_etudiants }}</div><div class="metric-sub">inscrits</div></div>
+      <div class="metric"><div class="metric-label">Entreprises</div><div class="metric-val green">{{ stats.nb_entreprises }}</div><div class="metric-sub">dont {{ stats.nb_entreprises_verifiees }} vérifiées</div></div>
+      <div class="metric"><div class="metric-label">Offres actives</div><div class="metric-val blue">{{ stats.nb_offres_actives }}</div><div class="metric-sub">sur {{ stats.nb_offres_total }} total</div></div>
+      <div class="metric"><div class="metric-label">Candidatures</div><div class="metric-val blue">{{ stats.nb_candidatures }}</div><div class="metric-sub">dont {{ stats.nb_acceptees }} acceptées</div></div>
+      <div class="metric"><div class="metric-label">En attente</div><div class="metric-val red">{{ stats.entreprises_en_attente }}</div><div class="metric-sub">entreprises à valider</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-bottom:14px">
+      <div class="card">
+        <div class="card-title">Entreprises en attente de vérification <a href="{{ url_for('admin.entreprises') }}?statut=en_attente">Voir tout →</a></div>
+        {% for e in entreprises_attente %}
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div class="cand-avatar" style="background:var(--green-light);color:var(--green-dark)">{{ e.initiales }}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500">{{ e.nom }}</div>
+            <div style="font-size:11px;color:var(--gray-500)">{{ e.secteur }} · {{ e.ville }}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <form method="POST" action="{{ url_for('admin.approuver_entreprise', entreprise_id=e.id) }}" style="display:inline">
+              <button type="submit" class="btn btn-green btn-xs">✓ Approuver</button>
+            </form>
+            <form method="POST" action="{{ url_for('admin.rejeter_entreprise', entreprise_id=e.id) }}" style="display:inline" onsubmit="return confirm('Rejeter cette entreprise ?')">
+              <button type="submit" class="btn btn-xs" style="background:var(--red-light);color:var(--red-dark);border:1px solid #FCA5A5">✕ Rejeter</button>
+            </form>
+          </div>
+        </div>
+        {% else %}
+        <p style="font-size:12px;color:var(--gray-500);text-align:center;padding:14px 0">Aucune entreprise en attente ✓</p>
+        {% endfor %}
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title">Candidatures sans feedback <span style="font-size:10px;background:var(--red-light);color:var(--red-dark);padding:2px 6px;border-radius:4px">{{ feedbacks_manquants|length }}</span></div>
+          {% for c in feedbacks_manquants[:5] %}
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.etudiant.utilisateur.nom }}</div>
+              <div style="font-size:10px;color:var(--gray-500)">{{ c.offre.entreprise.nom }}</div>
+            </div>
+            <span style="font-size:10px;background:var(--red-light);color:var(--red-dark);padding:2px 6px;border-radius:4px">Sans feedback</span>
+          </div>
+          {% else %}
+          <p style="font-size:12px;color:var(--gray-500);text-align:center;padding:10px 0">Tous les refus ont un feedback ✓</p>
+          {% endfor %}
+        </div>
+
+        <div class="card">
+          <div class="card-title">Répartition par filière</div>
+          {% for filiere, count in stats_filieres %}
+          <div style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">
+              <span style="color:var(--gray-600)">{{ filiere }}</span>
+              <span style="font-weight:500">{{ count }}</span>
+            </div>
+            <div class="reco-bar">
+              <div class="reco-bar-fill" style="width:{% if stats_filieres[0][1] > 0 %}{{ (count / stats_filieres[0][1] * 100)|int }}{% else %}0{% endif %}%;background:var(--primary)"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Inscriptions récentes <a href="{{ url_for('admin.utilisateurs') }}">Voir tous →</a></div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border)">
+              <th style="text-align:left;padding:8px 4px;font-weight:500;color:var(--gray-500)">Nom</th>
+              <th style="text-align:left;padding:8px 4px;font-weight:500;color:var(--gray-500)">Email</th>
+              <th style="text-align:left;padding:8px 4px;font-weight:500;color:var(--gray-500)">Rôle</th>
+              <th style="text-align:left;padding:8px 4px;font-weight:500;color:var(--gray-500)">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in utilisateurs_recents %}
+            <tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:8px 4px;font-weight:500">{{ u.nom }}</td>
+              <td style="padding:8px 4px;color:var(--gray-500)">{{ u.email }}</td>
+              <td style="padding:8px 4px">
+                <span style="font-size:10px;padding:2px 7px;border-radius:4px;{% if u.role == 'ETUDIANT' %}background:var(--primary-light);color:var(--primary-dark){% elif u.role == 'ENTREPRISE' %}background:var(--green-light);color:var(--green-dark){% else %}background:#EDE9FE;color:#5B21B6{% endif %}">{{ u.role }}</span>
+              </td>
+              <td style="padding:8px 4px">
+                {% if u.actif %}
+                <span style="font-size:10px;color:var(--green-dark)">● Actif</span>
+                {% else %}
+                <span style="font-size:10px;color:var(--red-dark)">● Suspendu</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

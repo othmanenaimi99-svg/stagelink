@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}Tableau de bord — StageLink MA{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="topbar-search">
+    <form action="{{ url_for('etudiant.offres') }}" method="GET">
+      <input type="text" name="q" placeholder="Rechercher..." class="form-control" style="font-size:12px;padding:7px 12px">
+    </form>
+  </div>
+  <div class="topbar-right">
+    <a href="{{ url_for('etudiant.marquer_notifications_lues') }}" class="notif-btn">
+      🔔{% if notif_count > 0 %}<span class="notif-dot"></span>{% endif %}
+    </a>
+    <div class="avatar">{{ etudiant.initiales }}</div>
+    <span style="font-size:13px;color:#666">{{ etudiant.nom_complet.split()[0] }} {{ etudiant.nom_complet.split()[-1][0] if etudiant.nom_complet.split()|length > 1 else '' }}.</span>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-container"><div class="flash flash-{{ category }}">{{ message }}</div></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="body-layout">
+  <div class="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar avatar-lg" style="margin-bottom:8px">{{ etudiant.initiales }}</div>
+      <div class="sidebar-profile-name">{{ etudiant.nom_complet }}</div>
+      <div class="sidebar-profile-sub">{{ etudiant.filiere }} · {{ etudiant.niveau }} · {{ etudiant.universite }}</div>
+      <div class="profile-bar-wrap">
+        <div class="profile-bar-label"><span>Profil complété</span><span>{{ etudiant.completion_profil }}%</span></div>
+        <div class="profile-bar"><div class="profile-bar-fill" style="width:{{ etudiant.completion_profil }}%"></div></div>
+      </div>
+    </div>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Navigation</span>
+    <a href="{{ url_for('etudiant.dashboard') }}" class="sid-item active">◆ Tableau de bord</a>
+    <a href="{{ url_for('etudiant.offres') }}" class="sid-item">📋 Offres <span class="sid-badge">{{ nb_offres_count|default('') }}</span></a>
+    <a href="{{ url_for('etudiant.candidatures') }}" class="sid-item">📁 Mes candidatures <span class="sid-badge sid-badge-red">{{ nb_total }}</span></a>
+    <a href="{{ url_for('etudiant.profil') }}" class="sid-item">👤 Mon profil</a>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Raccourcis</span>
+    <a href="{{ url_for('etudiant.offres') }}" class="sid-item">⭐ Top matchs</a>
+    <a href="{{ url_for('etudiant.candidatures') }}?statut=REFUSEE" class="sid-item">💬 Feedbacks reçus <span class="sid-badge">{{ feedbacks|length }}</span></a>
+    <div class="sid-divider"></div>
+    <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)">↩ Déconnexion</a>
+  </div>
+
+  <div class="main">
+    <div style="margin-bottom:18px">
+      <h2 style="font-size:18px;font-weight:500">Bonjour, {{ etudiant.nom_complet.split()[0] }}</h2>
+      <p style="font-size:13px;color:#666;margin-top:2px">Voici un résumé de votre activité sur StageLink MA</p>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric"><div class="metric-label">Candidatures</div><div class="metric-val blue">{{ nb_total }}</div><div class="metric-sub">dont {{ nb_attente }} en attente</div></div>
+      <div class="metric"><div class="metric-label">Acceptées</div><div class="metric-val green">{{ nb_acceptee }}</div><div class="metric-sub">{% if nb_acceptee > 0 %}dont {{ nb_acceptee }} avec convention{% endif %}</div></div>
+      <div class="metric"><div class="metric-label">Refusées</div><div class="metric-val red">{{ nb_refusee }}</div><div class="metric-sub">avec feedback reçu</div></div>
+      <div class="metric"><div class="metric-label">Score moyen</div><div class="metric-val blue">{{ score_moyen }}%</div><div class="metric-sub">sur vos candidatures</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px">
+      <div class="card">
+        <div class="card-title">Mes candidatures récentes <a href="{{ url_for('etudiant.candidatures') }}">Voir tout →</a></div>
+        {% for c in candidatures_recentes %}
+        <div class="cand-item">
+          <div class="cand-avatar" style="background:var(--primary-light);color:var(--primary-dark)">{{ c.offre.entreprise.initiales }}</div>
+          <div class="cand-info">
+            <div class="cand-title">{{ c.offre.titre }}</div>
+            <div class="cand-company">{{ c.offre.entreprise.nom }} · {{ c.offre.ville }}</div>
+          </div>
+          <span class="badge-statut {{ c.statut_class }}">{{ c.statut_label }}</span>
+          <span style="font-size:10px;color:var(--gray-500);margin-left:6px">{{ c.score_matching|int }}%</span>
+        </div>
+        {% else %}
+        <p style="font-size:12px;color:var(--gray-500);text-align:center;padding:14px 0">Aucune candidature pour l'instant.<br><a href="{{ url_for('etudiant.offres') }}" style="color:var(--primary)">Découvrir les offres</a></p>
+        {% endfor %}
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title" style="font-size:13px">Mon profil</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div class="avatar avatar-lg">{{ etudiant.initiales }}</div>
+            <div>
+              <div style="font-size:13px;font-weight:500">{{ etudiant.nom_complet }}</div>
+              <div style="font-size:11px;color:var(--gray-500)">{{ etudiant.filiere }} · {{ etudiant.niveau }} · {{ etudiant.universite }}</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="font-size:11px;color:var(--gray-500)">Complétion</span>
+            <span style="font-size:11px;font-weight:500;color:var(--primary)">{{ etudiant.completion_profil }}%</span>
+          </div>
+          <div class="profile-bar" style="margin-bottom:10px">
+            <div class="profile-bar-fill" style="width:{{ etudiant.completion_profil }}%"></div>
+          </div>
+          {% if etudiant.completion_profil < 100 %}
+          <div style="font-size:11px;color:var(--gray-500);margin-bottom:6px">Éléments manquants :</div>
+          {% if not etudiant.competences %}
+          <div class="profil-missing-item"><span class="missing-dot"></span>Compétences (3 min.)</div>
+          {% endif %}
+          {% if not etudiant.cv_path %}
+          <div class="profil-missing-item" style="margin-top:4px"><span class="missing-dot"></span>CV (PDF)</div>
+          {% endif %}
+          {% endif %}
+          <a href="{{ url_for('etudiant.profil') }}" class="btn btn-secondary btn-full" style="margin-top:10px;font-size:11px;padding:6px">Compléter mon profil</a>
+        </div>
+
+        {% if convention_dispo %}
+        <div class="convention-card">
+          <div style="font-size:13px;font-weight:500;margin-bottom:10px">Convention disponible</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:20px">📄</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:500;color:var(--green-dark)">Stage {{ convention_dispo.offre.entreprise.nom }}</div>
+              <div style="font-size:10px;color:var(--green-btn)">Convention PDF générée</div>
+            </div>
+            <a href="{{ url_for('etudiant.telecharger_convention', candidature_id=convention_dispo.id) }}" class="btn btn-green btn-xs">Télécharger</a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if offres_recommandees %}
+    <div class="card">
+      <div class="card-title">Offres recommandées <a href="{{ url_for('etudiant.offres') }}">Voir toutes →</a></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        {% for offre, detail in offres_recommandees %}
+        <a href="{{ url_for('etudiant.detail_offre', offre_id=offre.id) }}" class="reco-card" style="text-decoration:none;color:inherit">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <div class="co-logo" style="background:var(--primary-light);color:var(--primary-dark)">{{ offre.entreprise.initiales }}</div>
+            <span style="font-size:12px;font-weight:500;color:{% if detail.color == 'primary' %}var(--primary){% elif detail.color == 'green' %}var(--green){% else %}var(--orange){% endif %}">{{ detail.total|int }}%</span>
+          </div>
+          <div style="font-size:12px;font-weight:500">{{ offre.titre }}</div>
+          <div style="font-size:10px;color:var(--gray-500);margin-bottom:6px">{{ offre.entreprise.nom }} · {{ offre.ville }}</div>
+          <div class="reco-bar"><div class="reco-bar-fill" style="width:{{ detail.total }}%;background:{% if detail.color == 'primary' %}var(--primary){% elif detail.color == 'green' %}var(--green){% else %}var(--orange){% endif %}"></div></div>
+          <div class="tags">
+            {% for c in offre.competences[:2] %}
+            <span class="tag {% if c in etudiant.competences %}match{% endif %}">{{ c.nom }}</span>
+            {% endfor %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if feedbacks %}
+    <div class="card">
+      <div class="card-title">Feedbacks reçus <a href="{{ url_for('etudiant.candidatures') }}?statut=REFUSEE">Voir tout →</a></div>
+      {% for c in feedbacks %}
+      <div class="feedback-box">
+        <div class="fb-avatar" style="background:var(--red-light);color:var(--red-dark)">{{ c.offre.entreprise.initiales }}</div>
+        <div>
+          <div style="font-size:12px;font-weight:500">{{ c.offre.entreprise.nom }} — Refus</div>
+          <div class="fb-text">"{{ c.feedback.commentaire }}"</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}Candidatures — StageLink MA{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="logo">Stage<span>Link</span> MA</div>
+  <div class="topbar-right">
+    <div class="avatar" style="background:var(--green-light);color:var(--green-dark)">{{ entreprise.initiales }}</div>
+    <span style="font-size:13px;color:#666">{{ entreprise.nom }}</span>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-container"><div class="flash flash-{{ category }}">{{ message }}</div></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="body-layout">
+  <div class="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar avatar-lg" style="background:var(--green-light);color:var(--green-dark);margin-bottom:8px">{{ entreprise.initiales }}</div>
+      <div class="sidebar-profile-name">{{ entreprise.nom }}</div>
+      <div class="sidebar-profile-sub">{{ entreprise.secteur }} · {{ entreprise.ville }}</div>
+    </div>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Navigation</span>
+    <a href="{{ url_for('entreprise.dashboard') }}" class="sid-item">◆ Tableau de bord</a>
+    <a href="{{ url_for('entreprise.candidatures') }}" class="sid-item active">📁 Candidatures <span class="sid-badge sid-badge-red">{{ entreprise.nb_candidatures_en_attente }}</span></a>
+    <a href="{{ url_for('entreprise.offres') }}" class="sid-item">📋 Mes offres</a>
+    <a href="{{ url_for('entreprise.profil') }}" class="sid-item">🏢 Mon profil</a>
+    <div class="sid-divider"></div>
+    <span class="sid-label">Actions</span>
+    <a href="{{ url_for('entreprise.nouvelle_offre') }}" class="sid-item">+ Nouvelle offre</a>
+    <div class="sid-divider"></div>
+    <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)">↩ Déconnexion</a>
+  </div>
+
+  <div class="main">
+    <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <h2 style="font-size:18px;font-weight:500">Candidatures reçues</h2>
+        <p style="font-size:13px;color:#666;margin-top:2px">{{ candidatures|length }} candidature{{ 's' if candidatures|length != 1 }} · triées par score de matching</p>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+      <a href="{{ url_for('entreprise.candidatures') }}" class="filter-chip {% if not statut_filtre %}active{% endif %}" style="text-decoration:none">Toutes</a>
+      <a href="{{ url_for('entreprise.candidatures') }}?statut=EN_ATTENTE{% if offre_id_filtre %}&offre_id={{ offre_id_filtre }}{% endif %}" class="filter-chip {% if statut_filtre == 'EN_ATTENTE' %}active{% endif %}" style="text-decoration:none">En attente</a>
+      <a href="{{ url_for('entreprise.candidatures') }}?statut=ACCEPTEE{% if offre_id_filtre %}&offre_id={{ offre_id_filtre }}{% endif %}" class="filter-chip {% if statut_filtre == 'ACCEPTEE' %}active{% endif %}" style="text-decoration:none">Acceptées</a>
+      <a href="{{ url_for('entreprise.candidatures') }}?statut=REFUSEE{% if offre_id_filtre %}&offre_id={{ offre_id_filtre }}{% endif %}" class="filter-chip {% if statut_filtre == 'REFUSEE' %}active{% endif %}" style="text-decoration:none">Refusées</a>
+      {% if offres_list %}
+      <form method="GET" action="{{ url_for('entreprise.candidatures') }}" style="display:inline-flex;align-items:center;gap:6px;margin-left:6px">
+        {% if statut_filtre %}<input type="hidden" name="statut" value="{{ statut_filtre }}">{% endif %}
+        <select name="offre_id" class="form-control form-control-sm" onchange="this.form.submit()" style="width:200px;font-size:11px">
+          <option value="">Toutes les offres</option>
+          {% for o in offres_list %}
+          <option value="{{ o.id }}" {% if offre_id_filtre == o.id|string %}selected{% endif %}>{{ o.titre }}</option>
+          {% endfor %}
+        </select>
+      </form>
+      {% endif %}
+    </div>
+
+    {% if candidatures %}
+    <div style="display:flex;flex-direction:column;gap:12px">
+      {% for c in candidatures %}
+      <div class="card" style="padding:14px">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div class="cand-avatar" style="background:var(--primary-light);color:var(--primary-dark);flex-shrink:0;width:40px;height:40px;font-size:14px">{{ c.etudiant.initiales }}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap">
+              <div style="font-size:13px;font-weight:500">{{ c.etudiant.utilisateur.nom }}</div>
+              <span class="badge-statut {{ c.statut_class }}">{{ c.statut_label }}</span>
+              <span style="font-size:10px;color:var(--gray-400)">{{ c.etudiant.filiere }} · {{ c.etudiant.niveau }} · {{ c.etudiant.universite }}</span>
+            </div>
+            <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px">
+              Pour l'offre : <strong style="color:var(--gray-700)">{{ c.offre.titre }}</strong>
+            </div>
+            <div class="tags" style="margin-bottom:8px">
+              {% for comp in c.etudiant.competences[:4] %}
+              <span class="tag {% if comp in c.offre.competences %}match{% endif %}">{{ comp.nom }}</span>
+              {% endfor %}
+              {% if c.etudiant.competences|length > 4 %}
+              <span class="tag">+{{ c.etudiant.competences|length - 4 }}</span>
+              {% endif %}
+            </div>
+            {% if c.lettre_motivation %}
+            <details style="margin-top:6px">
+              <summary style="font-size:11px;color:var(--primary);cursor:pointer">Voir la lettre de motivation</summary>
+              <div style="background:var(--gray-50);border-radius:6px;padding:10px;margin-top:6px;font-size:12px;color:var(--gray-700);line-height:1.6;white-space:pre-line">{{ c.lettre_motivation }}</div>
+            </details>
+            {% endif %}
+            {% if c.statut == 'REFUSEE' and c.feedback %}
+            <div style="background:var(--red-light);border-radius:6px;padding:8px;margin-top:8px;font-size:11px;color:var(--red-dark)">
+              <strong>Feedback envoyé :</strong> "{{ c.feedback.commentaire }}"
+            </div>
+            {% endif %}
+          </div>
+          <div style="text-align:right;flex-shrink:0;min-width:80px">
+            <div style="font-size:18px;font-weight:700;color:{% if c.score_matching >= 80 %}var(--primary){% elif c.score_matching >= 60 %}var(--green){% else %}var(--orange){% endif %}">{{ c.score_matching|int }}%</div>
+            <div style="font-size:10px;color:var(--gray-400);margin-bottom:10px">matching</div>
+            {% if c.statut == 'EN_ATTENTE' %}
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <form method="POST" action="{{ url_for('entreprise.accepter_candidature', candidature_id=c.id) }}" onsubmit="return confirm('Accepter cette candidature ?')">
+                <button type="submit" class="btn btn-green btn-xs btn-full">✓ Accepter</button>
+              </form>
+              <button type="button" onclick="ouvrirModalRefus({{ c.id }})" class="btn btn-xs btn-full" style="background:var(--red-light);color:var(--red-dark);border:1px solid #FCA5A5">✕ Refuser</button>
+            </div>
+            {% endif %}
+            {% if c.etudiant.cv_path %}
+            <a href="/static/uploads/{{ c.etudiant.cv_path.split('/')[-1] if '/' in c.etudiant.cv_path else c.etudiant.cv_path }}" target="_blank" class="btn btn-secondary btn-xs btn-full" style="margin-top:5px;font-size:10px">📄 CV</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:48px 20px;color:var(--gray-500)">
+      <div style="font-size:32px;margin-bottom:12px">📁</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:6px">Aucune candidature</div>
+      <div style="font-size:12px">{% if statut_filtre %}Aucune candidature avec ce statut.{% else %}Vous n'avez pas encore reçu de candidatures.{% endif %}</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div id="modal-refus" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;padding:24px;width:440px;max-width:94vw">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:16px;font-weight:600">Refuser la candidature</h3>
+      <button onclick="document.getElementById('modal-refus').style.display='none'" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--gray-500)">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--gray-600);margin-bottom:14px">Un feedback est obligatoire pour tout refus. L'étudiant le recevra dans son tableau de bord.</p>
+    <form id="form-refus" method="POST" action="">
+      <div class="form-group">
+        <label class="form-label">Motif du refus *</label>
+        <textarea name="commentaire" class="form-control" rows="4" placeholder="Expliquez les raisons du refus à l'étudiant..." required style="font-size:12px"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button type="button" onclick="document.getElementById('modal-refus').style.display='none'" class="btn btn-secondary" style="flex:1;justify-content:center;font-size:12px;padding:9px">Annuler</button>
+        <button type="submit" class="btn" style="flex:2;justify-content:center;font-size:12px;padding:9px;background:var(--red);color:#fff">Confirmer le refus</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function ouvrirModalRefus(candidatureId) {
+  const form = document.getElementById('form-refus');
+  form.action = '/entreprise/candidature/' + candidatureId + '/refuser';
+  document.getElementById('modal-refus').style.display = 'flex';
+}
+document.getElementById('modal-refus').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+</script>
+{% endblock %}
