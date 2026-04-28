@@ -3,3 +3,5 @@ flask-sqlalchemy
 flask-login
 reportlab
 gunicorn
+cloudinary
+psycopg2-binary
