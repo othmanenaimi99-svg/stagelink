@@ -1,5 +1,6 @@
 """
 Initialise la base de données avec uniquement le compte admin.
+Si FORCE_RESET=true, supprime toutes les données avant de recréer.
 Usage : python seed_db.py
 """
 import os
@@ -9,6 +10,11 @@ from models import db, Utilisateur, Admin
 app = create_app()
 
 with app.app_context():
+    if os.environ.get('FORCE_RESET', '').lower() == 'true':
+        print("FORCE_RESET activé : suppression de toutes les données...")
+        db.drop_all()
+        print("Tables supprimées.")
+
     db.create_all()
 
     admin_email = os.environ.get('ADMIN_EMAIL', 'admin@stagelink.ma')
