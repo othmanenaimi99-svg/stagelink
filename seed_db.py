@@ -24,10 +24,14 @@ with app.app_context():
         print("ERREUR : variable d'environnement ADMIN_PASSWORD non définie.")
         exit(1)
 
-    if Utilisateur.query.filter_by(email=admin_email).first():
-        print(f"Admin déjà existant : {admin_email}")
+    existing = Utilisateur.query.filter_by(email=admin_email).first()
+    if existing:
+        existing.set_password(admin_password)
+        existing.actif = True
+        db.session.commit()
+        print(f"Mot de passe admin mis à jour : {admin_email}")
     else:
-        u = Utilisateur(email=admin_email, role='ADMIN')
+        u = Utilisateur(email=admin_email, role='ADMIN', actif=True)
         u.set_password(admin_password)
         db.session.add(u)
         db.session.flush()
