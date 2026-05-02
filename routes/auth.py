@@ -13,6 +13,15 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+@auth_bp.route('/debug-check')
+def debug_check():
+    user = Utilisateur.query.filter_by(email='admin@stagelink.ma').first()
+    if not user:
+        return "ADMIN INTROUVABLE"
+    return (f"email={user.email} | role={user.role} | actif={user.actif} | "
+            f"check_stagelink2026={user.check_password('stagelink2026')}")
+
+
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
