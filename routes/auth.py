@@ -13,20 +13,6 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@auth_bp.route('/debug-reset-admin')
-def debug_reset_admin():
-    import os
-    user = Utilisateur.query.filter_by(email='admin@stagelink.ma').first()
-    if not user:
-        return "ADMIN INTROUVABLE"
-    pwd = os.environ.get('ADMIN_PASSWORD', 'stagelink2026')
-    user.set_password(pwd)
-    user.actif = True
-    db.session.commit()
-    ok = user.check_password(pwd)
-    return f"Mot de passe mis à jour. Vérification : {ok}"
-
-
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
