@@ -1,1 +1,1 @@
-web: gunicorn wsgi:app
+web: python seed_db.py && gunicorn wsgi:app
