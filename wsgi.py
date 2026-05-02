@@ -7,8 +7,8 @@ app = create_app()
 with app.app_context():
     db.create_all()
 
-    admin_email = os.environ.get('ADMIN_EMAIL', 'admin@stagelink.ma')
-    admin_password = os.environ.get('ADMIN_PASSWORD')
+    admin_email = os.environ.get('ADMIN_EMAIL', 'admin@stagelink.ma').strip()
+    admin_password = os.environ.get('ADMIN_PASSWORD', '').strip()
 
     print(f"[WSGI] ADMIN_EMAIL={admin_email!r}")
     print(f"[WSGI] ADMIN_PASSWORD set={bool(admin_password)}")
