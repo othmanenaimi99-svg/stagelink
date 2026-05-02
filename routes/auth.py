@@ -13,17 +13,18 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@auth_bp.route('/debug-check')
-def debug_check():
+@auth_bp.route('/debug-reset-admin')
+def debug_reset_admin():
     import os
     user = Utilisateur.query.filter_by(email='admin@stagelink.ma').first()
-    env_pwd = os.environ.get('ADMIN_PASSWORD', 'NON_DEFINI')
     if not user:
-        return f"ADMIN INTROUVABLE | ADMIN_PASSWORD env={env_pwd!r}"
-    return (f"email={user.email} | role={user.role} | actif={user.actif} | "
-            f"ADMIN_PASSWORD_env={env_pwd!r} | "
-            f"check_env={user.check_password(env_pwd)} | "
-            f"check_stagelink2026={user.check_password('stagelink2026')}")
+        return "ADMIN INTROUVABLE"
+    pwd = os.environ.get('ADMIN_PASSWORD', 'stagelink2026')
+    user.set_password(pwd)
+    user.actif = True
+    db.session.commit()
+    ok = user.check_password(pwd)
+    return f"Mot de passe mis à jour. Vérification : {ok}"
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
