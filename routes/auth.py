@@ -15,10 +15,14 @@ def allowed_file(filename):
 
 @auth_bp.route('/debug-check')
 def debug_check():
+    import os
     user = Utilisateur.query.filter_by(email='admin@stagelink.ma').first()
+    env_pwd = os.environ.get('ADMIN_PASSWORD', 'NON_DEFINI')
     if not user:
-        return "ADMIN INTROUVABLE"
+        return f"ADMIN INTROUVABLE | ADMIN_PASSWORD env={env_pwd!r}"
     return (f"email={user.email} | role={user.role} | actif={user.actif} | "
+            f"ADMIN_PASSWORD_env={env_pwd!r} | "
+            f"check_env={user.check_password(env_pwd)} | "
             f"check_stagelink2026={user.check_password('stagelink2026')}")
 
 
