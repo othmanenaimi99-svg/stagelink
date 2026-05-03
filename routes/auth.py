@@ -125,11 +125,24 @@ def register_step4():
             cv_path = None
             cv_file = request.files.get('cv')
             if cv_file and cv_file.filename and allowed_file(cv_file.filename):
-                filename = secure_filename(f"cv_{u.id}_{cv_file.filename}")
-                upload_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'cvs')
-                os.makedirs(upload_dir, exist_ok=True)
-                cv_file.save(os.path.join(upload_dir, filename))
-                cv_path = os.path.join('static', 'uploads', 'cvs', filename)
+                try:
+                    import cloudinary
+                    import cloudinary.uploader
+                    cloudinary.config(
+                        cloud_name=current_app.config['CLOUDINARY_CLOUD_NAME'],
+                        api_key=current_app.config['CLOUDINARY_API_KEY'],
+                        api_secret=current_app.config['CLOUDINARY_API_SECRET']
+                    )
+                    result = cloudinary.uploader.upload(
+                        cv_file,
+                        resource_type='raw',
+                        folder='stagelink/cvs',
+                        public_id=f'cv_{u.id}',
+                        overwrite=True
+                    )
+                    cv_path = result['secure_url']
+                except Exception:
+                    cv_path = None
 
             etudiant = Etudiant(
                 utilisateur_id=u.id,

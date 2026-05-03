@@ -8,6 +8,10 @@ from services.matching import get_offres_avec_scores, get_score_detail, generer_
 etudiant_bp = Blueprint('etudiant', __name__, url_prefix='/etudiant')
 
 
+def get_notif_count():
+    return current_user.notifications.filter_by(est_lue=False).count()
+
+
 def etudiant_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -58,7 +62,8 @@ def dashboard():
         nb_acceptee=nb_acceptee, nb_refusee=nb_refusee,
         score_moyen=score_moyen,
         convention_dispo=convention_dispo,
-        nb_offres_count=nb_offres_count)
+        nb_offres_count=nb_offres_count,
+        notif_count=get_notif_count())
 
 
 @etudiant_bp.route('/offres')
@@ -79,7 +84,10 @@ def offres():
     if ville_filter:
         query = query.filter(Offre.ville == ville_filter)
     if duree_filter:
-        query = query.filter(Offre.duree == int(duree_filter))
+        try:
+            query = query.filter(Offre.duree == int(duree_filter))
+        except ValueError:
+            pass
     if q:
         query = query.filter(
             Offre.titre.ilike(f'%{q}%') |
@@ -98,7 +106,8 @@ def offres():
     return render_template('etudiant/offres.html',
         etudiant=etudiant,
         offres=offres_avec_scores,
-        nb_offres_count=nb_offres_count)
+        nb_offres_count=nb_offres_count,
+        notif_count=get_notif_count())
 
 
 @etudiant_bp.route('/offres/<int:offre_id>')
@@ -124,7 +133,8 @@ def detail_offre(offre_id):
         etudiant=etudiant,
         detail=score_detail,
         deja_postule=candidature_existante,
-        lettre_auto=lettre_auto)
+        lettre_auto=lettre_auto,
+        notif_count=get_notif_count())
 
 
 @etudiant_bp.route('/postuler/<int:offre_id>', methods=['POST'])
@@ -139,6 +149,10 @@ def postuler(offre_id):
     if existant:
         flash("Vous avez déjà postulé à cette offre.", 'error')
         return redirect(url_for('etudiant.detail_offre', offre_id=offre_id))
+
+    if not etudiant.cv_path:
+        flash("Vous devez uploader votre CV avant de postuler.", 'error')
+        return redirect(url_for('etudiant.profil'))
 
     lettre = request.form.get('lettre_motivation', '').strip()
     if not lettre:
@@ -181,7 +195,8 @@ def candidatures():
     return render_template('etudiant/candidatures.html',
         etudiant=etudiant,
         candidatures=cands.all(),
-        statut_filtre=statut_filter)
+        statut_filtre=statut_filter,
+        notif_count=get_notif_count())
 
 
 @etudiant_bp.route('/convention/<int:candidature_id>/telecharger')
@@ -274,7 +289,8 @@ def profil():
 
     return render_template('etudiant/profil.html',
         etudiant=etudiant,
-        toutes_competences=competences_all)
+        toutes_competences=competences_all,
+        notif_count=get_notif_count())
 
 
 @etudiant_bp.route('/notifications/lire')

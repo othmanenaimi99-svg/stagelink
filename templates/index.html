@@ -8,10 +8,9 @@
     <a href="{{ url_for('etudiant.offres') if current_user.is_authenticated else '#' }}">Offres</a>
     <a href="#">Comment ça marche</a>
     <a href="#">Entreprises</a>
-    <a href="{{ url_for('set_lang', code='en' if lang == 'fr' else 'fr') }}"
-       style="font-size:12px;background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer">
-      {{ 'EN' if lang == 'fr' else 'FR' }} / {{ 'FR' if lang == 'fr' else 'EN' }}
-    </a>
+    <span style="font-size:12px;background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px">
+      FR / EN
+    </span>
   </div>
   <div style="display:flex;gap:8px">
     <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-sm">Connexion</a>

@@ -138,7 +138,7 @@ def refuser_candidature(candidature_id):
     notif = Notification(
         utilisateur_id=c.etudiant.utilisateur_id,
         message=f"Votre candidature pour « {c.offre.titre} » chez {c.offre.entreprise.nom} a été refusée. Un feedback vous a été laissé.",
-        type='info'
+        type='error'
     )
     db.session.add(notif)
     db.session.commit()

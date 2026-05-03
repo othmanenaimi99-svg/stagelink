@@ -108,7 +108,7 @@
             </div>
             {% endif %}
             {% if c.etudiant.cv_path %}
-            <a href="/static/uploads/{{ c.etudiant.cv_path.split('/')[-1] if '/' in c.etudiant.cv_path else c.etudiant.cv_path }}" target="_blank" class="btn btn-secondary btn-xs btn-full" style="margin-top:5px;font-size:10px">📄 CV</a>
+            <a href="{{ c.etudiant.cv_path }}" target="_blank" class="btn btn-secondary btn-xs btn-full" style="margin-top:5px;font-size:10px">📄 CV</a>
             {% endif %}
           </div>
         </div>
