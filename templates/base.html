@@ -8,5 +8,68 @@
 </head>
 <body>
 {% block body %}{% endblock %}
+<script>
+(function () {
+  // Only activate on mobile widths
+  function isMobile() { return window.innerWidth <= 768; }
+
+  function init() {
+    var topbar = document.querySelector('.topbar');
+    var sidebar = document.querySelector('.sidebar');
+    if (!topbar || !sidebar) return;
+
+    // Inject hamburger button as first child of topbar
+    if (!document.querySelector('.hamburger-btn')) {
+      var btn = document.createElement('button');
+      btn.className = 'hamburger-btn';
+      btn.setAttribute('aria-label', 'Ouvrir le menu');
+      btn.innerHTML = '&#9776;';
+      topbar.insertBefore(btn, topbar.firstChild);
+    }
+
+    // Inject overlay backdrop
+    if (!document.querySelector('.sidebar-overlay')) {
+      var overlay = document.createElement('div');
+      overlay.className = 'sidebar-overlay';
+      document.body.appendChild(overlay);
+    }
+
+    var hamburger = document.querySelector('.hamburger-btn');
+    var backdrop = document.querySelector('.sidebar-overlay');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      backdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    hamburger.addEventListener('click', function () {
+      if (sidebar.classList.contains('open')) { closeSidebar(); } else { openSidebar(); }
+    });
+    backdrop.addEventListener('click', closeSidebar);
+
+    // Close sidebar when a nav link is clicked (navigating away)
+    sidebar.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', function () { if (isMobile()) closeSidebar(); });
+    });
+
+    // Reset on resize to desktop
+    window.addEventListener('resize', function () {
+      if (!isMobile()) { closeSidebar(); }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
 </body>
 </html>
