@@ -52,12 +52,74 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Filière requise *</label>
-              <select name="filiere_requise" class="form-control form-control-sm" required>
-                <option value="">-- Choisir --</option>
-                {% for f in ['Finance','Marketing','Gestion','Informatique','Logistique','RH','Commerce','Comptabilité','Audit','Économie'] %}
-                <option value="{{ f }}">{{ f }}</option>
-                {% endfor %}
+              <label class="form-label">Filière requise</label>
+              <select name="filiere_requise" class="form-control form-control-sm">
+                <option value="">Toutes filières</option>
+                <optgroup label="💼 Commerce &amp; Gestion">
+                  <option value="Finance">Finance</option>
+                  <option value="Comptabilité">Comptabilité</option>
+                  <option value="Gestion">Gestion</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Commerce">Commerce</option>
+                  <option value="Commerce International">Commerce International</option>
+                  <option value="RH">Ressources Humaines</option>
+                  <option value="Audit &amp; Contrôle de Gestion">Audit &amp; Contrôle de Gestion</option>
+                  <option value="Logistique">Logistique</option>
+                  <option value="Entrepreneuriat">Entrepreneuriat</option>
+                </optgroup>
+                <optgroup label="💻 Informatique &amp; Ingénierie">
+                  <option value="Génie Informatique">Génie Informatique</option>
+                  <option value="Informatique">Informatique</option>
+                  <option value="Data Science">Data Science / IA</option>
+                  <option value="Réseaux &amp; Télécommunications">Réseaux &amp; Télécommunications</option>
+                  <option value="Génie Civil">Génie Civil</option>
+                  <option value="Génie Électrique">Génie Électrique</option>
+                  <option value="Génie Industriel">Génie Industriel</option>
+                  <option value="Génie Mécanique">Génie Mécanique</option>
+                </optgroup>
+                <optgroup label="⚖️ Droit &amp; Sciences Politiques">
+                  <option value="Droit Privé">Droit Privé</option>
+                  <option value="Droit Public">Droit Public</option>
+                  <option value="Droit des Affaires">Droit des Affaires</option>
+                  <option value="Sciences Politiques">Sciences Politiques</option>
+                </optgroup>
+                <optgroup label="📊 Sciences Économiques">
+                  <option value="Sciences Économiques">Sciences Économiques</option>
+                  <option value="Économie Appliquée">Économie Appliquée</option>
+                </optgroup>
+                <optgroup label="🔬 Sciences &amp; Techniques">
+                  <option value="Mathématiques">Mathématiques</option>
+                  <option value="Physique">Physique</option>
+                  <option value="Chimie">Chimie</option>
+                  <option value="Biologie">Biologie</option>
+                  <option value="Géologie">Géologie</option>
+                </optgroup>
+                <optgroup label="⚕️ Médical &amp; Paramédical">
+                  <option value="Médecine">Médecine</option>
+                  <option value="Pharmacie">Pharmacie</option>
+                  <option value="Médecine Dentaire">Médecine Dentaire</option>
+                </optgroup>
+                <optgroup label="📚 Lettres &amp; Sciences Humaines">
+                  <option value="Langues Étrangères">Langues Étrangères</option>
+                  <option value="Communication">Communication</option>
+                  <option value="Psychologie">Psychologie</option>
+                  <option value="Sociologie">Sociologie</option>
+                </optgroup>
+                <optgroup label="🏛️ Architecture &amp; Urbanisme">
+                  <option value="Architecture">Architecture</option>
+                  <option value="Urbanisme">Urbanisme</option>
+                </optgroup>
+                <optgroup label="🌱 Agriculture &amp; Environnement">
+                  <option value="Agronomie">Agronomie</option>
+                  <option value="Environnement">Environnement</option>
+                </optgroup>
+                <optgroup label="🏨 Tourisme &amp; Hôtellerie">
+                  <option value="Tourisme">Tourisme</option>
+                  <option value="Hôtellerie &amp; Restauration">Hôtellerie &amp; Restauration</option>
+                </optgroup>
+                <optgroup label="Autre">
+                  <option value="Autre">Autre</option>
+                </optgroup>
               </select>
             </div>
             <div class="form-group">

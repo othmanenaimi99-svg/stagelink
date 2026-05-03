@@ -85,9 +85,72 @@
               <div class="form-group">
                 <label class="form-label">Filière *</label>
                 <select name="filiere" class="form-control form-control-sm" required>
-                  {% for f in ['Finance','Marketing','Gestion','Informatique','Logistique','RH','Commerce','Comptabilité','Audit','Économie'] %}
-                  <option value="{{ f }}" {% if etudiant.filiere == f %}selected{% endif %}>{{ f }}</option>
-                  {% endfor %}
+                  <option value="">-- Sélectionnez votre filière --</option>
+                  <optgroup label="💼 Commerce &amp; Gestion">
+                    <option value="Finance" {{ 'selected' if etudiant.filiere == 'Finance' }}>Finance</option>
+                    <option value="Comptabilité" {{ 'selected' if etudiant.filiere == 'Comptabilité' }}>Comptabilité</option>
+                    <option value="Gestion" {{ 'selected' if etudiant.filiere == 'Gestion' }}>Gestion</option>
+                    <option value="Marketing" {{ 'selected' if etudiant.filiere == 'Marketing' }}>Marketing</option>
+                    <option value="Commerce" {{ 'selected' if etudiant.filiere == 'Commerce' }}>Commerce</option>
+                    <option value="Commerce International" {{ 'selected' if etudiant.filiere == 'Commerce International' }}>Commerce International</option>
+                    <option value="RH" {{ 'selected' if etudiant.filiere == 'RH' }}>Ressources Humaines</option>
+                    <option value="Audit &amp; Contrôle de Gestion" {{ 'selected' if etudiant.filiere == 'Audit & Contrôle de Gestion' }}>Audit &amp; Contrôle de Gestion</option>
+                    <option value="Logistique" {{ 'selected' if etudiant.filiere == 'Logistique' }}>Logistique</option>
+                    <option value="Entrepreneuriat" {{ 'selected' if etudiant.filiere == 'Entrepreneuriat' }}>Entrepreneuriat</option>
+                  </optgroup>
+                  <optgroup label="💻 Informatique &amp; Ingénierie">
+                    <option value="Génie Informatique" {{ 'selected' if etudiant.filiere == 'Génie Informatique' }}>Génie Informatique</option>
+                    <option value="Informatique" {{ 'selected' if etudiant.filiere == 'Informatique' }}>Informatique</option>
+                    <option value="Data Science" {{ 'selected' if etudiant.filiere == 'Data Science' }}>Data Science / IA</option>
+                    <option value="Réseaux &amp; Télécommunications" {{ 'selected' if etudiant.filiere == 'Réseaux & Télécommunications' }}>Réseaux &amp; Télécommunications</option>
+                    <option value="Génie Civil" {{ 'selected' if etudiant.filiere == 'Génie Civil' }}>Génie Civil</option>
+                    <option value="Génie Électrique" {{ 'selected' if etudiant.filiere == 'Génie Électrique' }}>Génie Électrique</option>
+                    <option value="Génie Industriel" {{ 'selected' if etudiant.filiere == 'Génie Industriel' }}>Génie Industriel</option>
+                    <option value="Génie Mécanique" {{ 'selected' if etudiant.filiere == 'Génie Mécanique' }}>Génie Mécanique</option>
+                  </optgroup>
+                  <optgroup label="⚖️ Droit &amp; Sciences Politiques">
+                    <option value="Droit Privé" {{ 'selected' if etudiant.filiere == 'Droit Privé' }}>Droit Privé</option>
+                    <option value="Droit Public" {{ 'selected' if etudiant.filiere == 'Droit Public' }}>Droit Public</option>
+                    <option value="Droit des Affaires" {{ 'selected' if etudiant.filiere == 'Droit des Affaires' }}>Droit des Affaires</option>
+                    <option value="Sciences Politiques" {{ 'selected' if etudiant.filiere == 'Sciences Politiques' }}>Sciences Politiques</option>
+                  </optgroup>
+                  <optgroup label="📊 Sciences Économiques">
+                    <option value="Sciences Économiques" {{ 'selected' if etudiant.filiere == 'Sciences Économiques' }}>Sciences Économiques</option>
+                    <option value="Économie Appliquée" {{ 'selected' if etudiant.filiere == 'Économie Appliquée' }}>Économie Appliquée</option>
+                  </optgroup>
+                  <optgroup label="🔬 Sciences &amp; Techniques">
+                    <option value="Mathématiques" {{ 'selected' if etudiant.filiere == 'Mathématiques' }}>Mathématiques</option>
+                    <option value="Physique" {{ 'selected' if etudiant.filiere == 'Physique' }}>Physique</option>
+                    <option value="Chimie" {{ 'selected' if etudiant.filiere == 'Chimie' }}>Chimie</option>
+                    <option value="Biologie" {{ 'selected' if etudiant.filiere == 'Biologie' }}>Biologie</option>
+                    <option value="Géologie" {{ 'selected' if etudiant.filiere == 'Géologie' }}>Géologie</option>
+                  </optgroup>
+                  <optgroup label="⚕️ Médical &amp; Paramédical">
+                    <option value="Médecine" {{ 'selected' if etudiant.filiere == 'Médecine' }}>Médecine</option>
+                    <option value="Pharmacie" {{ 'selected' if etudiant.filiere == 'Pharmacie' }}>Pharmacie</option>
+                    <option value="Médecine Dentaire" {{ 'selected' if etudiant.filiere == 'Médecine Dentaire' }}>Médecine Dentaire</option>
+                  </optgroup>
+                  <optgroup label="📚 Lettres &amp; Sciences Humaines">
+                    <option value="Langues Étrangères" {{ 'selected' if etudiant.filiere == 'Langues Étrangères' }}>Langues Étrangères</option>
+                    <option value="Communication" {{ 'selected' if etudiant.filiere == 'Communication' }}>Communication</option>
+                    <option value="Psychologie" {{ 'selected' if etudiant.filiere == 'Psychologie' }}>Psychologie</option>
+                    <option value="Sociologie" {{ 'selected' if etudiant.filiere == 'Sociologie' }}>Sociologie</option>
+                  </optgroup>
+                  <optgroup label="🏛️ Architecture &amp; Urbanisme">
+                    <option value="Architecture" {{ 'selected' if etudiant.filiere == 'Architecture' }}>Architecture</option>
+                    <option value="Urbanisme" {{ 'selected' if etudiant.filiere == 'Urbanisme' }}>Urbanisme</option>
+                  </optgroup>
+                  <optgroup label="🌱 Agriculture &amp; Environnement">
+                    <option value="Agronomie" {{ 'selected' if etudiant.filiere == 'Agronomie' }}>Agronomie</option>
+                    <option value="Environnement" {{ 'selected' if etudiant.filiere == 'Environnement' }}>Environnement</option>
+                  </optgroup>
+                  <optgroup label="🏨 Tourisme &amp; Hôtellerie">
+                    <option value="Tourisme" {{ 'selected' if etudiant.filiere == 'Tourisme' }}>Tourisme</option>
+                    <option value="Hôtellerie &amp; Restauration" {{ 'selected' if etudiant.filiere == 'Hôtellerie & Restauration' }}>Hôtellerie &amp; Restauration</option>
+                  </optgroup>
+                  <optgroup label="Autre">
+                    <option value="Autre" {{ 'selected' if etudiant.filiere == 'Autre' }}>Autre</option>
+                  </optgroup>
                 </select>
               </div>
             </div>
