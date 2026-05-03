@@ -77,9 +77,30 @@
               <div class="form-group">
                 <label class="form-label">Université *</label>
                 <select name="universite" class="form-control form-control-sm" required>
-                  {% for u in ['ENCG Marrakech','ENCG Casablanca','ENCG Agadir','ENCG Fès','FSJES Marrakech','FSJES Casablanca','ISCAE','ENCG Oujda','ENSA Marrakech','EST Casablanca','Université Hassan II','Université Cadi Ayyad','Autre'] %}
-                  <option value="{{ u }}" {% if etudiant.universite == u %}selected{% endif %}>{{ u }}</option>
-                  {% endfor %}
+                  <option value="">-- Sélectionnez votre établissement --</option>
+                  <optgroup label="🎓 Université Cadi Ayyad — Marrakech">
+                    <option value="ENCG Marrakech" {{ 'selected' if etudiant.universite == 'ENCG Marrakech' }}>ENCG Marrakech</option>
+                    <option value="FSJES Marrakech" {{ 'selected' if etudiant.universite == 'FSJES Marrakech' }}>FSJES Marrakech</option>
+                    <option value="FLSH Marrakech" {{ 'selected' if etudiant.universite == 'FLSH Marrakech' }}>FLSH Marrakech</option>
+                    <option value="Faculté des Sciences Semlalia" {{ 'selected' if etudiant.universite == 'Faculté des Sciences Semlalia' }}>Faculté des Sciences Semlalia</option>
+                    <option value="FST Marrakech" {{ 'selected' if etudiant.universite == 'FST Marrakech' }}>FST Marrakech</option>
+                    <option value="ENSA Marrakech" {{ 'selected' if etudiant.universite == 'ENSA Marrakech' }}>ENSA Marrakech</option>
+                    <option value="ENSAM Marrakech" {{ 'selected' if etudiant.universite == 'ENSAM Marrakech' }}>ENSAM Marrakech</option>
+                    <option value="Faculté de Médecine et Pharmacie Marrakech" {{ 'selected' if etudiant.universite == 'Faculté de Médecine et Pharmacie Marrakech' }}>Faculté de Médecine et Pharmacie</option>
+                    <option value="EST Marrakech" {{ 'selected' if etudiant.universite == 'EST Marrakech' }}>EST Marrakech</option>
+                  </optgroup>
+                  <optgroup label="🏢 Écoles Privées — Marrakech">
+                    <option value="UPM Marrakech" {{ 'selected' if etudiant.universite == 'UPM Marrakech' }}>UPM (Université Privée de Marrakech)</option>
+                    <option value="HEM Marrakech" {{ 'selected' if etudiant.universite == 'HEM Marrakech' }}>HEM Marrakech</option>
+                    <option value="EMSI Marrakech" {{ 'selected' if etudiant.universite == 'EMSI Marrakech' }}>EMSI Marrakech</option>
+                  </optgroup>
+                  <optgroup label="🔧 OFPPT — Marrakech">
+                    <option value="ISTA Marrakech" {{ 'selected' if etudiant.universite == 'ISTA Marrakech' }}>ISTA Marrakech</option>
+                    <option value="CFA Marrakech" {{ 'selected' if etudiant.universite == 'CFA Marrakech' }}>CFA Marrakech</option>
+                  </optgroup>
+                  <optgroup label="Autre">
+                    <option value="Autre" {{ 'selected' if etudiant.universite == 'Autre' }}>Autre établissement</option>
+                  </optgroup>
                 </select>
               </div>
               <div class="form-group">
