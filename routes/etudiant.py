@@ -17,7 +17,7 @@ def etudiant_required(f):
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated or current_user.role != 'ETUDIANT':
             abort(403)
-return f(*args, **kwargs)
+        return f(*args, **kwargs)
     return login_required(decorated)
 
 
