@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Vérifiez votre email — StageLink MA{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8fafc;padding:24px">
+  <div style="background:#fff;border-radius:16px;padding:48px 40px;max-width:480px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+    <div style="font-size:48px;margin-bottom:16px">📧</div>
+    <h2 style="font-size:22px;font-weight:700;color:#111827;margin-bottom:8px">Vérifiez votre email</h2>
+    <p style="color:#6b7280;font-size:14px;margin-bottom:24px">
+      Un lien de confirmation a été envoyé à<br>
+      <strong style="color:#111827">{{ email }}</strong>
+    </p>
+    <p style="color:#6b7280;font-size:13px;margin-bottom:32px">
+      Cliquez sur le lien dans l'email pour activer votre compte. Vérifiez aussi vos spams.
+    </p>
+    <form method="POST" action="{{ url_for('auth.resend_verification') }}">
+      <input type="hidden" name="email" value="{{ email }}">
+      <button type="submit" style="background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:8px;padding:10px 20px;font-size:13px;cursor:pointer;width:100%">
+        Renvoyer l'email de confirmation
+      </button>
+    </form>
+    <div style="margin-top:20px">
+      <a href="{{ url_for('auth.login') }}" style="color:#6b7280;font-size:13px">Retour à la connexion</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

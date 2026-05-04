@@ -1,6 +1,7 @@
 import os
 from app import create_app
 from models import db, Utilisateur, Admin, Competence
+from sqlalchemy import text
 
 app = create_app()
 
@@ -18,6 +19,13 @@ COMPETENCES = [
 
 with app.app_context():
     db.create_all()
+
+    # Migrer les utilisateurs existants : marquer tous comme vérifiés
+    try:
+        Utilisateur.query.filter(Utilisateur.email_verifie == None).update({'email_verifie': True})
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
 
     # Créer les compétences si elles n'existent pas
     for nom, categorie in COMPETENCES:

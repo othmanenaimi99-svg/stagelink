@@ -174,15 +174,53 @@ def register_step4():
 
         db.session.commit()
         session.pop('register_data', None)
-        login_user(u)
-        flash("Compte créé avec succès ! Bienvenue sur StageLink MA.", 'success')
-        if data['role'] == 'ETUDIANT':
-            return redirect(url_for('etudiant.dashboard'))
-        else:
-            flash("Votre compte est en attente de vérification par notre équipe.", 'info')
-            return redirect(url_for('entreprise.dashboard'))
+
+        from services.email_service import generate_verification_token, send_verification_email
+        token = generate_verification_token(u.email)
+        verification_url = url_for('auth.verify_email', token=token, _external=True)
+        send_verification_email(u.email, verification_url)
+
+        session['pending_verify_email'] = u.email
+        return redirect(url_for('auth.check_email'))
 
     return render_template('auth/login.html', tab='register', step=4, data=data)
+
+
+@auth_bp.route('/check-email')
+def check_email():
+    email = session.get('pending_verify_email', '')
+    return render_template('auth/check_email.html', email=email)
+
+
+@auth_bp.route('/verify/<token>')
+def verify_email(token):
+    from services.email_service import verify_token
+    email = verify_token(token)
+    if not email:
+        flash("Lien de vérification invalide ou expiré.", 'error')
+        return redirect(url_for('auth.login'))
+    user = Utilisateur.query.filter_by(email=email).first()
+    if not user:
+        flash("Compte introuvable.", 'error')
+        return redirect(url_for('auth.login'))
+    user.email_verifie = True
+    db.session.commit()
+    login_user(user)
+    flash("Email vérifié ! Bienvenue sur StageLink MA.", 'success')
+    return _redirect_by_role(user)
+
+
+@auth_bp.route('/resend-verification', methods=['POST'])
+def resend_verification():
+    email = request.form.get('email', '').strip()
+    user = Utilisateur.query.filter_by(email=email).first()
+    if user and not user.email_verifie:
+        from services.email_service import generate_verification_token, send_verification_email
+        token = generate_verification_token(user.email)
+        verification_url = url_for('auth.verify_email', token=token, _external=True)
+        send_verification_email(user.email, verification_url)
+    flash("Email de vérification renvoyé.", 'success')
+    return redirect(url_for('auth.check_email'))
 
 
 def _redirect_by_role(user):
