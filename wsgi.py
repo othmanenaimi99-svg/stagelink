@@ -39,10 +39,9 @@ with app.app_context():
             if existing:
                 existing.set_password(admin_password)
                 existing.actif = True
-                existing.email_verifie = True
                 db.session.commit()
             else:
-                u = Utilisateur(email=admin_email, role='ADMIN', actif=True, email_verifie=True)
+                u = Utilisateur(email=admin_email, role='ADMIN', actif=True)
                 u.set_password(admin_password)
                 db.session.add(u)
                 db.session.flush()
