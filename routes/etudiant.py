@@ -17,10 +17,7 @@ def etudiant_required(f):
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated or current_user.role != 'ETUDIANT':
             abort(403)
-        if not current_user.email_verifie:
-            flash("Veuillez vérifier votre email avant d'accéder à votre compte.", 'error')
-            return redirect(url_for('auth.check_email'))
-        return f(*args, **kwargs)
+return f(*args, **kwargs)
     return login_required(decorated)
 
 

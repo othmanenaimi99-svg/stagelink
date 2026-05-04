@@ -6,4 +6,3 @@ gunicorn
 cloudinary
 psycopg2-binary
 python-dotenv
-resend

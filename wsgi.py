@@ -20,24 +20,6 @@ COMPETENCES = [
 with app.app_context():
     db.create_all()
 
-    # Ajouter la colonne email_verifie si elle n'existe pas encore dans PostgreSQL
-    try:
-        db.session.execute(text(
-            "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS email_verifie BOOLEAN DEFAULT FALSE"
-        ))
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-
-    # Migration one-time : marquer les anciens utilisateurs (avant vérif email) comme vérifiés
-    try:
-        db.session.execute(text(
-            "UPDATE utilisateur SET email_verifie = TRUE WHERE email_verifie IS NULL"
-        ))
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-
     # Créer les compétences si elles n'existent pas
     try:
         for nom, categorie in COMPETENCES:
