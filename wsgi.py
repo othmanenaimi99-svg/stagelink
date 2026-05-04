@@ -29,10 +29,10 @@ with app.app_context():
     except Exception:
         db.session.rollback()
 
-    # Marquer tous les utilisateurs existants comme vérifiés (migration one-time)
+    # Migration one-time : marquer les anciens utilisateurs (avant vérif email) comme vérifiés
     try:
         db.session.execute(text(
-            "UPDATE utilisateur SET email_verifie = TRUE WHERE email_verifie IS NULL OR email_verifie = FALSE"
+            "UPDATE utilisateur SET email_verifie = TRUE WHERE email_verifie IS NULL"
         ))
         db.session.commit()
     except Exception:
