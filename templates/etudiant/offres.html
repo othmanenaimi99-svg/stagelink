@@ -130,10 +130,10 @@
           </div>
         </div>
 
-        <div style="margin:10px 0 8px">
-          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--gray-500);margin-bottom:3px">
-            <span>Score de matching</span>
-            <span style="font-weight:500;color:{% if detail.color == 'primary' %}var(--primary){% elif detail.color == 'green' %}var(--green){% else %}var(--orange){% endif %}">{{ detail.total|int }}%</span>
+        <div style="margin:12px 0 8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <span style="font-size:10px;color:var(--gray-500);font-weight:500">🎯 Score de compatibilité</span>
+            <span style="font-size:12px;font-weight:700;color:{% if detail.color == 'primary' %}var(--primary){% elif detail.color == 'green' %}var(--green){% else %}var(--orange){% endif %}">{{ detail.total|int }}%</span>
           </div>
           <div class="reco-bar">
             <div class="reco-bar-fill" style="width:{{ detail.total }}%;background:{% if detail.color == 'primary' %}var(--primary){% elif detail.color == 'green' %}var(--green){% else %}var(--orange){% endif %}"></div>

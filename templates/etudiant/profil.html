@@ -237,16 +237,23 @@
 
       <div style="position:sticky;top:16px">
         <div class="card" style="margin-bottom:12px">
-          <div style="font-size:13px;font-weight:500;margin-bottom:10px">Complétion du profil</div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-            <div class="avatar avatar-lg">{{ etudiant.initiales }}</div>
-            <div>
-              <div style="font-size:14px;font-weight:600;color:{% if etudiant.completion_profil >= 80 %}var(--primary){% elif etudiant.completion_profil >= 60 %}var(--green){% else %}var(--orange){% endif %}">{{ etudiant.completion_profil }}%</div>
-              <div style="font-size:11px;color:var(--gray-500)">{% if etudiant.completion_profil == 100 %}Profil complet !{% elif etudiant.completion_profil >= 80 %}Très bon profil{% elif etudiant.completion_profil >= 60 %}Bon profil{% else %}Profil incomplet{% endif %}</div>
-            </div>
-          </div>
-          <div class="profile-bar" style="margin-bottom:14px">
-            <div class="profile-bar-fill" style="width:{{ etudiant.completion_profil }}%"></div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:14px">Complétion du profil</div>
+          <div style="text-align:center;margin-bottom:16px">
+            {% set pct = etudiant.completion_profil %}
+            {% set circ = 213.6 %}
+            {% set dash = (pct / 100 * circ)|round(1) %}
+            {% set color = 'var(--primary)' if pct >= 80 else ('var(--green)' if pct >= 60 else 'var(--orange)') %}
+            <svg width="100" height="100" viewBox="0 0 80 80" style="display:block;margin:0 auto">
+              <circle cx="40" cy="40" r="34" fill="none" stroke="#eee" stroke-width="7"/>
+              <circle cx="40" cy="40" r="34" fill="none"
+                      stroke="{{ color }}" stroke-width="7"
+                      stroke-dasharray="{{ dash }} {{ circ }}"
+                      stroke-linecap="round"
+                      transform="rotate(-90 40 40)"
+                      style="transition:stroke-dasharray 1s ease"/>
+            </svg>
+            <div style="font-size:22px;font-weight:700;color:{{ color }};margin-top:-54px;margin-bottom:30px">{{ pct }}%</div>
+            <div style="font-size:12px;color:var(--gray-500)">{% if pct == 100 %}Profil complet !{% elif pct >= 80 %}Très bon profil{% elif pct >= 60 %}Bon profil{% else %}Profil incomplet{% endif %}</div>
           </div>
           <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
             <div style="display:flex;align-items:center;gap:8px;color:var(--green-dark)">
