@@ -30,7 +30,7 @@
         <a href="{{ url_for('auth.register_step1') }}" class="btn btn-primary" style="padding:13px 28px;font-size:14px;border-radius:10px">Je cherche un stage →</a>
         <a href="{{ url_for('auth.register_step1') }}" class="btn btn-secondary" style="padding:13px 28px;font-size:14px;border-radius:10px">Je recrute un stagiaire</a>
       </div>
-      <div style="display:flex;gap:24px;margin-top:28px;flex-wrap:wrap">
+      <div style="display:flex;gap:24px;margin-top:28px;flex-wrap:wrap;justify-content:center">
         <div style="font-size:12px;color:#666;display:flex;align-items:center;gap:6px">
           <span style="color:var(--green);font-size:15px">✓</span> Inscription gratuite
         </div>
@@ -39,41 +39,6 @@
         </div>
         <div style="font-size:12px;color:#666;display:flex;align-items:center;gap:6px">
           <span style="color:var(--green);font-size:15px">✓</span> Aucune fausse offre
-        </div>
-      </div>
-    </div>
-    <div class="sl-hero-right">
-      <div class="sl-mock-card">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-          <div style="width:40px;height:40px;border-radius:10px;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary);font-size:13px">CIH</div>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#111">Stage Contrôle de Gestion</div>
-            <div style="font-size:11px;color:#888">CIH Bank · Marrakech</div>
-          </div>
-          <div style="margin-left:auto;background:var(--primary);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px">92%</div>
-        </div>
-        <div style="font-size:10px;color:#888;margin-bottom:6px">Score de compatibilité</div>
-        <div style="height:6px;background:#eee;border-radius:3px;overflow:hidden">
-          <div style="height:6px;width:92%;background:linear-gradient(90deg,var(--primary),#5ba3e8);border-radius:3px;animation:matchFill .8s ease forwards"></div>
-        </div>
-        <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
-          <span style="background:var(--green-light);color:var(--green-dark);font-size:10px;padding:3px 8px;border-radius:6px">✓ Finance</span>
-          <span style="background:var(--green-light);color:var(--green-dark);font-size:10px;padding:3px 8px;border-radius:6px">✓ Excel</span>
-          <span style="background:var(--green-light);color:var(--green-dark);font-size:10px;padding:3px 8px;border-radius:6px">✓ Marrakech</span>
-        </div>
-        <div style="margin-top:14px;display:flex;gap:8px">
-          <button style="flex:1;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:500;cursor:pointer">Postuler</button>
-          <button style="flex:1;background:#f5f5f5;color:#444;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:500;cursor:pointer">Voir détails</button>
-        </div>
-      </div>
-      <div class="sl-mock-card" style="margin-top:12px;opacity:.7;transform:scale(.96)">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:40px;height:40px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--green-dark);font-size:13px">ATW</div>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#111">Analyse Financière & Risques</div>
-            <div style="font-size:11px;color:#888">Attijariwafa Bank · Casablanca</div>
-          </div>
-          <div style="margin-left:auto;background:var(--green-btn);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px">78%</div>
         </div>
       </div>
     </div>
@@ -210,19 +175,12 @@
   50% { opacity: .5; transform: scale(1.3); }
 }
 .sl-hero-inner {
-  display: flex;
-  align-items: center;
-  gap: 48px;
-  max-width: 1100px;
+  max-width: 700px;
   margin: 0 auto;
-  text-align: left;
+  text-align: center;
 }
-.sl-hero-left { flex: 1; }
-.sl-hero-right {
-  flex: 0 0 340px;
-  display: flex;
-  flex-direction: column;
-}
+.sl-hero-left { width: 100%; }
+.sl-hero-cta { justify-content: center; }
 .sl-mock-card {
   background: #fff;
   border-radius: 16px;
