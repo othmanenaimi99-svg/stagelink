@@ -30,10 +30,11 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   color: var(--gray-800);
   background: var(--gray-50);
   font-size: 14px;
+  -webkit-font-smoothing: antialiased;
 }
 
 a { text-decoration: none; color: inherit; }
@@ -254,7 +255,8 @@ a { text-decoration: none; color: inherit; }
   background: var(--white);
   border-radius: var(--radius-md);
   padding: 12px 14px;
-  border: var(--border);
+  border: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
 }
 .metric-label { font-size: 10px; color: var(--gray-500); margin-bottom: 4px; }
 .metric-val { font-size: 20px; font-weight: 500; }
@@ -268,7 +270,8 @@ a { text-decoration: none; color: inherit; }
 .card {
   background: var(--white);
   border-radius: var(--radius-lg);
-  border: var(--border);
+  border: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
   padding: 14px;
   margin-bottom: 12px;
 }
@@ -424,7 +427,7 @@ a { text-decoration: none; color: inherit; }
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
@@ -463,7 +466,7 @@ a { text-decoration: none; color: inherit; }
   padding: 9px 12px;
   border: 1px solid var(--gray-300);
   border-radius: var(--radius-md);
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   background: white;
 }
 .form-control:focus { outline: none; border-color: var(--primary); }
@@ -513,14 +516,18 @@ textarea.form-control { resize: vertical; }
 
 .offer-card {
   background: var(--white);
-  border: var(--border);
+  border: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
   border-radius: var(--radius-lg);
   padding: 16px;
   cursor: pointer;
-  transition: border-color .15s;
+  transition: transform .2s ease, box-shadow .2s ease;
 }
-.offer-card:hover { border-color: #bbb; }
-.offer-card.top-match { border-color: var(--primary); border-width: 1.5px; }
+.offer-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.11), 0 0 0 1px rgba(0,0,0,0.04);
+}
+.offer-card.top-match { box-shadow: 0 1px 4px rgba(24,95,165,0.15), 0 0 0 1.5px var(--primary); }
 
 .offer-card-top {
   display: flex;
@@ -566,10 +573,20 @@ textarea.form-control { resize: vertical; }
   background: var(--gray-100);
   margin: 8px 0 4px;
 }
-.match-fill { height: 3px; border-radius: 2px; }
+.match-fill {
+  height: 3px;
+  border-radius: 2px;
+  transform-origin: left;
+  animation: matchFill .8s cubic-bezier(.4,0,.2,1) forwards;
+}
 .fill-primary { background: var(--primary); }
 .fill-green { background: var(--green); }
 .fill-orange { background: var(--orange); }
+
+@keyframes matchFill {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
 
 .match-detail {
   font-size: 10px;
@@ -745,7 +762,7 @@ textarea.form-control { resize: vertical; }
 .sl-hero {
   padding: 56px 28px 48px;
   text-align: center;
-  background: var(--white);
+  background: linear-gradient(160deg, #EAF3FC 0%, #F5F9FF 40%, #ffffff 100%);
 }
 .sl-hero-badge {
   display: inline-flex;
