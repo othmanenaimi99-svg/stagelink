@@ -55,10 +55,22 @@
     </div>
 
     <div class="metrics-grid">
-      <div class="metric"><div class="metric-label">Candidatures</div><div class="metric-val blue">{{ nb_total }}</div><div class="metric-sub">dont {{ nb_attente }} en attente</div></div>
-      <div class="metric"><div class="metric-label">Acceptées</div><div class="metric-val green">{{ nb_acceptee }}</div><div class="metric-sub">{% if nb_acceptee > 0 %}dont {{ nb_acceptee }} avec convention{% endif %}</div></div>
-      <div class="metric"><div class="metric-label">Refusées</div><div class="metric-val red">{{ nb_refusee }}</div><div class="metric-sub">avec feedback reçu</div></div>
-      <div class="metric"><div class="metric-label">Score moyen</div><div class="metric-val blue">{{ score_moyen }}%</div><div class="metric-sub">sur vos candidatures</div></div>
+      <div class="metric" style="display:flex;align-items:center;gap:14px">
+        <div style="width:44px;height:44px;border-radius:12px;background:var(--primary-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">📁</div>
+        <div><div class="metric-label">Candidatures</div><div class="metric-val blue">{{ nb_total }}</div><div class="metric-sub">dont {{ nb_attente }} en attente</div></div>
+      </div>
+      <div class="metric" style="display:flex;align-items:center;gap:14px">
+        <div style="width:44px;height:44px;border-radius:12px;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">✅</div>
+        <div><div class="metric-label">Acceptées</div><div class="metric-val green">{{ nb_acceptee }}</div><div class="metric-sub">{% if nb_acceptee > 0 %}avec convention PDF{% else %}en attente de réponse{% endif %}</div></div>
+      </div>
+      <div class="metric" style="display:flex;align-items:center;gap:14px">
+        <div style="width:44px;height:44px;border-radius:12px;background:var(--red-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">💬</div>
+        <div><div class="metric-label">Refusées</div><div class="metric-val red">{{ nb_refusee }}</div><div class="metric-sub">avec feedback reçu</div></div>
+      </div>
+      <div class="metric" style="display:flex;align-items:center;gap:14px">
+        <div style="width:44px;height:44px;border-radius:12px;background:var(--orange-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">🎯</div>
+        <div><div class="metric-label">Score moyen</div><div class="metric-val blue">{{ score_moyen }}%</div><div class="metric-sub">sur vos candidatures</div></div>
+      </div>
     </div>
 
     <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px">
