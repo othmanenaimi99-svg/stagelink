@@ -128,10 +128,24 @@ def register_step4():
 
     if request.method == 'POST':
         from flask import current_app
+        from sqlalchemy.exc import IntegrityError
+
+        # Vérifier si email déjà utilisé
+        if Utilisateur.query.filter_by(email=data['email']).first():
+            flash("Cet email est déjà utilisé. Veuillez vous connecter.", 'error')
+            session.pop('register_data', None)
+            return redirect(url_for('auth.login'))
+
         u = Utilisateur(email=data['email'], role=data['role'])
         u.set_password(data['password'])
         db.session.add(u)
-        db.session.flush()
+        try:
+            db.session.flush()
+        except IntegrityError:
+            db.session.rollback()
+            flash("Cet email est déjà utilisé. Veuillez vous connecter.", 'error')
+            session.pop('register_data', None)
+            return redirect(url_for('auth.login'))
 
         if data['role'] == 'ETUDIANT':
             cv_path = None

@@ -51,7 +51,10 @@ def send_verification_code(to_email, code, nom=''):
         msg['To'] = to_email
         msg.attach(MIMEText(html, 'html'))
 
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+        with smtplib.SMTP('smtp.gmail.com', 587, timeout=15) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
             server.login(gmail_user, gmail_password.replace(' ', ''))
             server.sendmail(gmail_user, to_email, msg.as_string())
 
