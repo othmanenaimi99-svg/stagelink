@@ -293,6 +293,34 @@ def profil():
         notif_count=get_notif_count())
 
 
+@etudiant_bp.route('/offres/<int:offre_id>/favori', methods=['POST'])
+@etudiant_required
+def toggle_favori(offre_id):
+    from flask import jsonify
+    offre = Offre.query.get_or_404(offre_id)
+    etudiant = current_user.etudiant
+    if offre in etudiant.favoris:
+        etudiant.favoris.remove(offre)
+        db.session.commit()
+        return jsonify({'favori': False})
+    else:
+        etudiant.favoris.append(offre)
+        db.session.commit()
+        return jsonify({'favori': True})
+
+
+@etudiant_bp.route('/favoris')
+@etudiant_required
+def mes_favoris():
+    etudiant = current_user.etudiant
+    from services.matching import get_offres_avec_scores
+    offres_avec_scores = get_offres_avec_scores(etudiant, etudiant.favoris)
+    return render_template('etudiant/favoris.html',
+        etudiant=etudiant,
+        offres=offres_avec_scores,
+        notif_count=get_notif_count())
+
+
 @etudiant_bp.route('/notifications/lire')
 @etudiant_required
 def marquer_notifications_lues():

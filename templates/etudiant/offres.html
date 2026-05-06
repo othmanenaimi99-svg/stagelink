@@ -43,6 +43,7 @@
     <div class="sid-divider"></div>
     <span class="sid-label">Raccourcis</span>
     <a href="{{ url_for('etudiant.offres') }}" class="sid-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Top matchs</a>
+    <a href="{{ url_for('etudiant.mes_favoris') }}" class="sid-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Mes favoris</a>
     <a href="{{ url_for('etudiant.candidatures') }}?statut=REFUSEE" class="sid-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Feedbacks reçus</a>
     <div class="sid-divider"></div>
     <a href="{{ url_for('auth.logout') }}" class="sid-item" style="color:var(--red)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Déconnexion</a>
@@ -110,7 +111,11 @@
     {% if offres %}
     <div class="offers-grid">
       {% for offre, detail in offres %}
-      <a href="{{ url_for('etudiant.detail_offre', offre_id=offre.id) }}" class="offer-card {% if detail.is_top_match %}top-match{% endif %}" style="text-decoration:none;color:inherit;display:block">
+      <a href="{{ url_for('etudiant.detail_offre', offre_id=offre.id) }}" class="offer-card {% if detail.is_top_match %}top-match{% endif %}" style="text-decoration:none;color:inherit;display:block;position:relative">
+        <button onclick="event.preventDefault();toggleFavori({{ offre.id }}, this)"
+                class="favori-btn {% if offre in etudiant.favoris %}active{% endif %}"
+                style="position:absolute;top:12px;right:12px;background:none;border:none;cursor:pointer;font-size:18px;padding:4px;z-index:2;color:{% if offre in etudiant.favoris %}var(--red){% else %}#ccc{% endif %}"
+                title="{% if offre in etudiant.favoris %}Retirer des favoris{% else %}Ajouter aux favoris{% endif %}">{% if offre in etudiant.favoris %}♥{% else %}♡{% endif %}</button>
         {% if detail.is_top_match %}
         <div class="top-match-badge">⭐ Top match</div>
         {% endif %}
@@ -176,4 +181,15 @@
     {% endif %}
   </div>
 </div>
+<script>
+function toggleFavori(offreId, btn) {
+  fetch('/etudiant/offres/' + offreId + '/favori', {method: 'POST', headers: {'X-Requested-With': 'XMLHttpRequest'}})
+    .then(r => r.json())
+    .then(data => {
+      btn.style.color = data.favori ? 'var(--red)' : '#ccc';
+      btn.innerHTML = data.favori ? '♥' : '♡';
+      btn.title = data.favori ? 'Retirer des favoris' : 'Ajouter aux favoris';
+    });
+}
+</script>
 {% endblock %}

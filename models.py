@@ -15,6 +15,11 @@ offre_competence = db.Table('offre_competence',
     db.Column('competence_id', db.Integer, db.ForeignKey('competence.id'), primary_key=True)
 )
 
+favoris_offre = db.Table('favoris_offre',
+    db.Column('etudiant_id', db.Integer, db.ForeignKey('etudiant.id'), primary_key=True),
+    db.Column('offre_id', db.Integer, db.ForeignKey('offre.id'), primary_key=True)
+)
+
 
 class Utilisateur(UserMixin, db.Model):
     __tablename__ = 'utilisateur'
@@ -64,6 +69,7 @@ class Etudiant(db.Model):
 
     competences = db.relationship('Competence', secondary=etudiant_competence, backref='etudiants')
     candidatures = db.relationship('Candidature', backref='etudiant', lazy='dynamic', cascade='all, delete-orphan')
+    favoris = db.relationship('Offre', secondary=favoris_offre, backref='favori_par')
 
     @property
     def initiales(self):
