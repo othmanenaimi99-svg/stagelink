@@ -22,6 +22,18 @@ def login():
         password = request.form.get('password', '')
         user = Utilisateur.query.filter_by(email=email).first()
         if user and user.check_password(password) and user.actif:
+            if not user.email_verifie:
+                # Compte non vérifié → renvoyer un code et rediriger
+                from services.email_service import generate_code, send_verification_code
+                from datetime import datetime, timedelta
+                code = generate_code()
+                user.code_verification = code
+                user.code_expiry = datetime.utcnow() + timedelta(minutes=10)
+                db.session.commit()
+                send_verification_code(user.email, code)
+                session['verify_user_id'] = user.id
+                flash("Votre email n'est pas encore vérifié. Un nouveau code a été envoyé.", 'info')
+                return redirect(url_for('auth.verify_code'))
             login_user(user)
             return _redirect_by_role(user)
         flash("Email ou mot de passe incorrect.", 'error')
