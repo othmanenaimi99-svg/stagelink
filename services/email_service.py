@@ -17,7 +17,7 @@ def send_verification_code(to_email, code, nom=''):
     try:
         resend.Emails.send({
             'from': mail_from,
-            'to': to_email,
+            'to': [to_email],
             'subject': f'{code} — Votre code de vérification StageLink MA',
             'html': f"""
             <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:40px 32px;border:1px solid #e5e7eb;border-radius:16px;background:#fff">
