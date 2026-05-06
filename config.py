@@ -9,6 +9,8 @@ class Config:
     _db_url = os.environ.get('SUPABASE_URL') or os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(BASE_DIR, 'stagelink.db'))
     if _db_url.startswith('postgres://'):
         _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
+    if 'supabase.co' in _db_url and 'sslmode' not in _db_url:
+        _db_url += '?sslmode=require'
     SQLALCHEMY_DATABASE_URI = _db_url
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
