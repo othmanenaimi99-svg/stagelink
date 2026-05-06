@@ -6,7 +6,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-only-insecure-key')
 
-    _db_url = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(BASE_DIR, 'stagelink.db'))
+    _db_url = os.environ.get('SUPABASE_URL') or os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(BASE_DIR, 'stagelink.db'))
     if _db_url.startswith('postgres://'):
         _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_DATABASE_URI = _db_url
