@@ -18,8 +18,6 @@ COMPETENCES = [
 ]
 
 with app.app_context():
-    db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
-    print(f"[WSGI] DB type: {'supabase' if 'supabase' in db_uri else 'railway' if 'railway' in db_uri else 'sqlite' if 'sqlite' in db_uri else 'other'}")
     db.create_all()
 
     # Créer les compétences si elles n'existent pas
