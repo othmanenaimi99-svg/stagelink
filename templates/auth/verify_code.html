@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Vérification email — StageLink MA{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8fafc;padding:24px">
+  <div style="background:#fff;border-radius:20px;padding:48px 40px;max-width:440px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+
+    <div style="width:64px;height:64px;background:#EAF3FC;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    </div>
+
+    <h2 style="font-size:22px;font-weight:700;color:#111827;margin-bottom:8px">Vérifiez votre email</h2>
+    <p style="color:#6b7280;font-size:14px;margin-bottom:6px">Un code à 6 chiffres a été envoyé à</p>
+    <p style="font-weight:600;color:#185FA5;font-size:14px;margin-bottom:28px">{{ email }}</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div style="padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;
+          {% if category == 'error' %}background:#FAECE7;color:#712B13;border:1px solid #F0997B;
+          {% else %}background:#E1F5EE;color:#085041;border:1px solid #5DCAA5;{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.verify_code') }}">
+      <div style="margin-bottom:20px">
+        <input type="text" name="code" maxlength="6" placeholder="_ _ _ _ _ _"
+               style="width:100%;text-align:center;font-size:32px;font-weight:700;letter-spacing:12px;
+                      padding:16px;border:2px solid #e5e7eb;border-radius:12px;outline:none;
+                      font-family:'Inter',Arial,sans-serif;color:#111827;background:#f9fafb"
+               oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+               onfocus="this.style.borderColor='#185FA5'"
+               onblur="this.style.borderColor='#e5e7eb'"
+               autocomplete="one-time-code" required autofocus>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" style="border-radius:10px;font-size:15px;padding:13px">
+        Vérifier →
+      </button>
+    </form>
+
+    <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
+      <p style="font-size:13px;color:#9ca3af">Le code expire dans 10 minutes.</p>
+      <form method="POST" action="{{ url_for('auth.resend_code') }}">
+        <button type="submit" style="background:none;border:none;color:#185FA5;font-size:13px;cursor:pointer;text-decoration:underline;font-family:'Inter',Arial,sans-serif">
+          Renvoyer le code
+        </button>
+      </form>
+      <a href="{{ url_for('auth.login') }}" style="color:#9ca3af;font-size:12px">Retour à la connexion</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Auto-submit quand 6 chiffres sont saisis
+document.querySelector('input[name="code"]').addEventListener('input', function() {
+  if (this.value.length === 6) {
+    this.closest('form').submit();
+  }
+});
+</script>
+{% endblock %}

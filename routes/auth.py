@@ -174,16 +174,75 @@ def register_step4():
 
         db.session.commit()
         session.pop('register_data', None)
-        login_user(u)
-        flash("Compte créé avec succès ! Bienvenue sur StageLink MA.", 'success')
-        if data['role'] == 'ETUDIANT':
-            return redirect(url_for('etudiant.dashboard'))
-        else:
-            flash("Votre compte est en attente de vérification par notre équipe.", 'info')
-            return redirect(url_for('entreprise.dashboard'))
+
+        # Générer et envoyer le code de vérification
+        from services.email_service import generate_code, send_verification_code
+        from datetime import datetime, timedelta
+        code = generate_code()
+        u.code_verification = code
+        u.code_expiry = datetime.utcnow() + timedelta(minutes=10)
+        db.session.commit()
+
+        nom = data.get('nom', '')
+        send_verification_code(u.email, code, nom)
+
+        session['verify_user_id'] = u.id
+        return redirect(url_for('auth.verify_code'))
 
     return render_template('auth/login.html', tab='register', step=4, data=data)
 
+
+
+@auth_bp.route('/verify-code', methods=['GET', 'POST'])
+def verify_code():
+    user_id = session.get('verify_user_id')
+    if not user_id:
+        return redirect(url_for('auth.login'))
+    user = Utilisateur.query.get(user_id)
+    if not user:
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'POST':
+        from datetime import datetime
+        code_saisi = request.form.get('code', '').strip()
+
+        if not user.code_expiry or datetime.utcnow() > user.code_expiry:
+            flash("Code expiré. Veuillez en demander un nouveau.", 'error')
+            return render_template('auth/verify_code.html', email=user.email)
+
+        if code_saisi == user.code_verification:
+            user.email_verifie = True
+            user.code_verification = None
+            user.code_expiry = None
+            db.session.commit()
+            session.pop('verify_user_id', None)
+            login_user(user)
+            flash("Email vérifié ! Bienvenue sur StageLink MA.", 'success')
+            return _redirect_by_role(user)
+        else:
+            flash("Code incorrect. Vérifiez votre email.", 'error')
+
+    return render_template('auth/verify_code.html', email=user.email)
+
+
+@auth_bp.route('/resend-code', methods=['POST'])
+def resend_code():
+    user_id = session.get('verify_user_id')
+    if not user_id:
+        return redirect(url_for('auth.login'))
+    user = Utilisateur.query.get(user_id)
+    if not user:
+        return redirect(url_for('auth.login'))
+
+    from services.email_service import generate_code, send_verification_code
+    from datetime import datetime, timedelta
+    code = generate_code()
+    user.code_verification = code
+    user.code_expiry = datetime.utcnow() + timedelta(minutes=10)
+    db.session.commit()
+    send_verification_code(user.email, code)
+    flash("Nouveau code envoyé.", 'success')
+    return redirect(url_for('auth.verify_code'))
 
 
 def _redirect_by_role(user):

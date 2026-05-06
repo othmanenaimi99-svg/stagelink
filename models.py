@@ -28,6 +28,9 @@ class Utilisateur(UserMixin, db.Model):
     mot_de_passe = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False)
     actif = db.Column(db.Boolean, default=True)
+    email_verifie = db.Column(db.Boolean, default=False)
+    code_verification = db.Column(db.String(6), nullable=True)
+    code_expiry = db.Column(db.DateTime, nullable=True)
 
     etudiant = db.relationship('Etudiant', backref='utilisateur', uselist=False, cascade='all, delete-orphan')
     entreprise = db.relationship('Entreprise', backref='utilisateur', uselist=False, cascade='all, delete-orphan')

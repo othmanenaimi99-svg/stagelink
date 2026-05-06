@@ -20,6 +20,22 @@ COMPETENCES = [
 with app.app_context():
     db.create_all()
 
+    # Migration: ajouter les nouvelles colonnes si elles n'existent pas
+    try:
+        db.session.execute(text("ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS email_verifie BOOLEAN DEFAULT FALSE"))
+        db.session.execute(text("ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS code_verification VARCHAR(6)"))
+        db.session.execute(text("ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS code_expiry TIMESTAMP"))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+    # Marquer les utilisateurs existants comme vérifiés (avant l'implémentation du système)
+    try:
+        db.session.execute(text("UPDATE utilisateur SET email_verifie = TRUE WHERE email_verifie IS NULL"))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
     # Créer les compétences si elles n'existent pas
     try:
         for nom, categorie in COMPETENCES:
