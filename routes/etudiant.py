@@ -18,6 +18,8 @@ def etudiant_required(f):
         if not current_user.is_authenticated or current_user.role != 'ETUDIANT':
             abort(403)
         if not current_user.email_verifie:
+            from flask import session as flask_session
+            flask_session['verify_user_id'] = current_user.id
             flash("Veuillez vérifier votre email pour accéder à votre compte.", 'error')
             return redirect(url_for('auth.verify_code'))
         return f(*args, **kwargs)

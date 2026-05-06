@@ -202,6 +202,16 @@ def verify_code():
     if not user:
         return redirect(url_for('auth.login'))
 
+    # Si pas de code en attente, en envoyer un automatiquement
+    if not user.code_verification and request.method == 'GET':
+        from services.email_service import generate_code, send_verification_code
+        from datetime import datetime, timedelta
+        code = generate_code()
+        user.code_verification = code
+        user.code_expiry = datetime.utcnow() + timedelta(minutes=10)
+        db.session.commit()
+        send_verification_code(user.email, code)
+
     if request.method == 'POST':
         from datetime import datetime
         code_saisi = request.form.get('code', '').strip()
