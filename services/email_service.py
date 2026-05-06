@@ -1,6 +1,5 @@
 import os
 import random
-import resend
 
 
 def generate_code():
@@ -10,16 +9,21 @@ def generate_code():
 def send_verification_code(to_email, code, nom=''):
     api_key = os.environ.get('RESEND_API_KEY')
     mail_from = os.environ.get('MAIL_FROM', 'onboarding@resend.dev')
+
+    print(f"[EMAIL] Sending to={to_email} from={mail_from} api_key_set={bool(api_key)}")
+
     if not api_key:
         print("[EMAIL] RESEND_API_KEY non défini")
         return False
-    resend.api_key = api_key
+
     try:
-        resend.Emails.send({
-            'from': mail_from,
-            'to': [to_email],
-            'subject': f'{code} — Votre code de vérification StageLink MA',
-            'html': f"""
+        import resend
+        resend.api_key = api_key
+        result = resend.Emails.send({
+            "from": mail_from,
+            "to": [to_email],
+            "subject": f"{code} — Votre code de vérification StageLink MA",
+            "html": f"""
             <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:40px 32px;border:1px solid #e5e7eb;border-radius:16px;background:#fff">
               <div style="text-align:center;margin-bottom:28px">
                 <h2 style="color:#185FA5;margin:0;font-size:22px">Stage<span style="color:#1D9E75">Link</span> MA</h2>
@@ -43,7 +47,8 @@ def send_verification_code(to_email, code, nom=''):
             </div>
             """
         })
+        print(f"[EMAIL] Success: {result}")
         return True
     except Exception as e:
-        print(f"[EMAIL] Erreur envoi: {e}")
+        print(f"[EMAIL] Error type={type(e).__name__} msg={e}")
         return False
