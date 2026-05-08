@@ -21,15 +21,18 @@ with app.app_context():
     db.create_all()
 
     # Migration: ajouter les nouvelles colonnes si elles n'existent pas
-    try:
-        db.session.execute(text("ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS email_verifie BOOLEAN DEFAULT FALSE"))
-        db.session.execute(text("ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS code_verification VARCHAR(6)"))
-        db.session.execute(text("ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS code_expiry TIMESTAMP"))
-        db.session.execute(text("ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS reset_token VARCHAR(100)"))
-        db.session.execute(text("ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS reset_token_expiry TIMESTAMP"))
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
+    for migration_sql in [
+        "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS email_verifie BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS code_verification VARCHAR(6)",
+        "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS code_expiry TIMESTAMP",
+        "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS reset_token VARCHAR(100)",
+        "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS reset_token_expiry TIMESTAMP",
+    ]:
+        try:
+            db.session.execute(text(migration_sql))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
     # Marquer les anciens utilisateurs (sans code en attente) comme vérifiés
     try:

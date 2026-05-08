@@ -300,7 +300,7 @@ def forgot_password():
             reset_url = url_for('auth.reset_password', token=token, _external=True)
             nom = user.nom if user.nom != user.email else ''
             send_reset_email(user.email, reset_url, nom)
-        flash("Si cet email existe, un lien de réinitialisation a été envoyé.", 'info')
+        flash("Lien envoyé ! Vérifiez votre boîte email ainsi que vos spams.", 'success')
         return redirect(url_for('auth.forgot_password'))
     return render_template('auth/forgot_password.html')
 
