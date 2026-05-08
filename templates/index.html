@@ -170,9 +170,23 @@
 </div>
 
 <style>
+/* ── Animations keyframes ── */
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: .5; transform: scale(1.3); }
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  from { left: -80%; }
+  to   { left: 150%; }
+}
+
+/* ── Hero gradient + animations ── */
+.sl-hero {
+  background: linear-gradient(180deg, #EAF3FC 0%, #ffffff 100%);
 }
 .sl-hero-inner {
   max-width: 700px;
@@ -180,57 +194,178 @@
   text-align: center;
 }
 .sl-hero-left { width: 100%; }
-.sl-hero-cta { justify-content: center; }
-.sl-mock-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 8px 32px rgba(24,95,165,.12), 0 2px 8px rgba(0,0,0,.06);
-  border: 1px solid rgba(24,95,165,.08);
+.sl-hero-cta  { justify-content: center; }
+
+.sl-hero-badge { animation: fadeSlideUp .55s ease both; }
+.sl-hero-left h1 { animation: fadeSlideUp .6s .1s ease both; }
+.sl-hero-left p  { animation: fadeSlideUp .6s .2s ease both; }
+.sl-hero-cta     { animation: fadeSlideUp .6s .3s ease both; }
+.sl-hero-left > div:last-child { animation: fadeSlideUp .6s .4s ease both; }
+
+/* ── Navbar scroll ── */
+.sl-nav {
+  transition: background .3s ease, box-shadow .3s ease, backdrop-filter .3s ease;
 }
+.sl-nav.sl-scrolled {
+  background: rgba(255,255,255,.85) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 2px 20px rgba(0,0,0,.08);
+}
+
+/* ── Feature cards ── */
 .sl-feat {
   background: #fff;
   border-radius: 14px;
   padding: 24px 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  border: 1px solid rgba(0,0,0,.05);
-  transition: transform .2s ease, box-shadow .2s ease;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  border: none;
+  position: relative;
+  overflow: hidden;
+  transition: transform .3s ease, box-shadow .3s ease;
 }
-.sl-feat:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+.sl-feat::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: #185FA5;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform .3s ease;
 }
+.sl-feat:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.12); }
+.sl-feat:hover::before { transform: scaleY(1); }
+
 .sl-feat-icon {
-  width: 48px;
-  height: 48px;
+  width: 48px; height: 48px;
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   margin-bottom: 14px;
 }
 .sl-feat h3 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #111; }
-.sl-feat p { font-size: 13px; color: #666; line-height: 1.6; }
+.sl-feat p  { font-size: 13px; color: #666; line-height: 1.6; }
+
+/* ── Role cards ── */
 .sl-role {
   background: #fff;
   border-radius: 16px;
   padding: 28px 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  border: 1px solid rgba(0,0,0,.05);
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  border: none;
+  transition: transform .3s ease, box-shadow .3s ease;
 }
+.sl-role:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,.1); }
 .sl-role-icon {
-  width: 44px;
-  height: 44px;
+  width: 44px; height: 44px;
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   margin-right: 12px;
 }
+
+/* ── Button shimmer ── */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -80%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+.btn-primary:hover::after {
+  animation: shimmer .55s ease forwards;
+}
+
+/* ── Scroll fade-in sections ── */
+.fade-section {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .65s ease, transform .65s ease;
+}
+.fade-section.fs-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
 @media (max-width: 768px) {
   .sl-hero-inner { flex-direction: column; text-align: center; }
   .sl-hero-right { display: none; }
   .sl-hero-left .sl-hero-cta { justify-content: center; flex-direction: column; align-items: center; }
 }
 </style>
+
+<script>
+(function () {
+  /* ── Navbar blur on scroll ── */
+  var nav = document.querySelector('.sl-nav');
+  if (nav) {
+    window.addEventListener('scroll', function () {
+      nav.classList.toggle('sl-scrolled', window.scrollY > 24);
+    }, { passive: true });
+  }
+
+  /* ── Counter animation ── */
+  function runCounter(el) {
+    var text = el.textContent.trim();
+    var m = text.match(/^(\d+)(.*)/);
+    if (!m || parseInt(m[1]) === 0) return;
+    var target = parseInt(m[1]);
+    var suffix = m[2];
+    var start = null;
+    var duration = 1400;
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(eased * target) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  var statsEl = document.querySelector('.sl-stats');
+  if (statsEl && 'IntersectionObserver' in window) {
+    var statsObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('.sl-stat-num').forEach(runCounter);
+          statsObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    statsObs.observe(statsEl);
+  }
+
+  /* ── Sections fade-in on scroll ── */
+  var targets = document.querySelectorAll('.sl-stats, .sl-section, .sl-cta-strip, .sl-roles');
+  if ('IntersectionObserver' in window) {
+    var fadeObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('fs-visible');
+          fadeObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    targets.forEach(function (t) {
+      t.classList.add('fade-section');
+      fadeObs.observe(t);
+    });
+  }
+})();
+</script>
 {% endblock %}
