@@ -39,7 +39,8 @@
     </form>
 
     <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
-      <p style="font-size:13px;color:#9ca3af">Le code expire dans 10 minutes.</p>
+      <p style="font-size:13px;color:#9ca3af">Le code expire dans 30 minutes.</p>
+      <p style="font-size:12px;color:#9ca3af">Vérifiez aussi vos <strong>spams/indésirables</strong>.</p>
       <form method="POST" action="{{ url_for('auth.resend_code') }}">
         <button type="submit" style="background:none;border:none;color:#185FA5;font-size:13px;cursor:pointer;text-decoration:underline;font-family:'Inter',Arial,sans-serif">
           Renvoyer le code
