@@ -1,7 +1,6 @@
 import os
 import random
-import json
-import urllib.request
+import resend
 
 
 def generate_code():
@@ -16,6 +15,8 @@ def send_verification_code(to_email, code, nom=''):
     if not api_key:
         print("[EMAIL] RESEND_API_KEY manquant")
         return False
+
+    resend.api_key = api_key
 
     html_body = f"""
     <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:40px 32px;border:1px solid #e5e7eb;border-radius:16px;background:#fff">
@@ -41,28 +42,15 @@ def send_verification_code(to_email, code, nom=''):
     </div>
     """
 
-    payload = {
-        "from": "StageLink MA <noreply@stagelinkma.com>",
-        "to": [to_email],
-        "subject": f"{code} — Code de vérification StageLink MA",
-        "html": html_body
-    }
-
     try:
-        data = json.dumps(payload).encode('utf-8')
-        req = urllib.request.Request(
-            'https://api.resend.com/emails',
-            data=data,
-            headers={
-                'Authorization': f'Bearer {api_key}',
-                'Content-Type': 'application/json'
-            },
-            method='POST'
-        )
-        with urllib.request.urlopen(req, timeout=10) as response:
-            result = response.read()
-            print(f"[EMAIL] Success: {result}")
-            return True
+        result = resend.Emails.send({
+            "from": "StageLink MA <noreply@stagelinkma.com>",
+            "to": [to_email],
+            "subject": f"{code} — Code de vérification StageLink MA",
+            "html": html_body
+        })
+        print(f"[EMAIL] Success: {result}")
+        return True
     except Exception as e:
         print(f"[EMAIL] Error {type(e).__name__}: {e}")
         return False
