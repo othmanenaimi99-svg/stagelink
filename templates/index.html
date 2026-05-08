@@ -48,16 +48,16 @@
 <!-- STATS -->
 <div class="sl-stats">
   <div class="sl-stat">
-    <div class="sl-stat-num">500k+</div>
-    <div class="sl-stat-label">Étudiants en recherche chaque année</div>
+    <div class="sl-stat-num" id="stat-etudiants">—</div>
+    <div class="sl-stat-label">Étudiants inscrits</div>
   </div>
   <div class="sl-stat">
-    <div class="sl-stat-num" style="color:var(--green)">87%</div>
-    <div class="sl-stat-label">Taux de matching pertinent</div>
+    <div class="sl-stat-num" id="stat-entreprises" style="color:var(--green)">—</div>
+    <div class="sl-stat-label">Entreprises inscrites</div>
   </div>
   <div class="sl-stat">
-    <div class="sl-stat-num" style="color:var(--primary)">0 piston</div>
-    <div class="sl-stat-label">Accès équitable pour tous</div>
+    <div class="sl-stat-num" id="stat-offres" style="color:var(--primary)">—</div>
+    <div class="sl-stat-label">Offres publiées</div>
   </div>
 </div>
 
@@ -319,35 +319,53 @@
   }
 
   /* ── Counter animation ── */
-  function runCounter(el) {
-    var text = el.textContent.trim();
-    var m = text.match(/^(\d+)(.*)/);
-    if (!m || parseInt(m[1]) === 0) return;
-    var target = parseInt(m[1]);
-    var suffix = m[2];
+  function runCounter(el, target) {
+    if (target === 0) { el.textContent = '0'; return; }
     var start = null;
     var duration = 1400;
     function step(ts) {
       if (!start) start = ts;
       var p = Math.min((ts - start) / duration, 1);
       var eased = 1 - Math.pow(1 - p, 3);
-      el.textContent = Math.round(eased * target) + suffix;
+      el.textContent = Math.round(eased * target);
       if (p < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
   }
 
+  /* ── Fetch real stats from API ── */
   var statsEl = document.querySelector('.sl-stats');
+  var statsLoaded = false;
+
+  function loadStats() {
+    if (statsLoaded) return;
+    statsLoaded = true;
+    fetch('/api/stats')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        runCounter(document.getElementById('stat-etudiants'), data.etudiants);
+        runCounter(document.getElementById('stat-entreprises'), data.entreprises);
+        runCounter(document.getElementById('stat-offres'), data.offres);
+      })
+      .catch(function() {
+        document.getElementById('stat-etudiants').textContent = '—';
+        document.getElementById('stat-entreprises').textContent = '—';
+        document.getElementById('stat-offres').textContent = '—';
+      });
+  }
+
   if (statsEl && 'IntersectionObserver' in window) {
     var statsObs = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) {
-          e.target.querySelectorAll('.sl-stat-num').forEach(runCounter);
+          loadStats();
           statsObs.unobserve(e.target);
         }
       });
-    }, { threshold: 0.4 });
+    }, { threshold: 0.3 });
     statsObs.observe(statsEl);
+  } else {
+    loadStats();
   }
 
   /* ── Sections fade-in on scroll ── */

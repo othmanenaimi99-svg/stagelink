@@ -42,6 +42,16 @@ def create_app():
         from flask import render_template
         return render_template('index.html')
 
+    @app.route('/api/stats')
+    def api_stats():
+        from flask import jsonify
+        from models import Etudiant, Entreprise, Offre
+        return jsonify({
+            'etudiants': Etudiant.query.count(),
+            'entreprises': Entreprise.query.count(),
+            'offres': Offre.query.count()
+        })
+
     @app.route('/lang/<code>')
     def set_lang(code):
         from flask import request
