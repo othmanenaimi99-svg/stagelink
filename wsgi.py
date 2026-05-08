@@ -25,8 +25,6 @@ with app.app_context():
         "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS email_verifie BOOLEAN DEFAULT FALSE",
         "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS code_verification VARCHAR(6)",
         "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS code_expiry TIMESTAMP",
-        "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS reset_token VARCHAR(100)",
-        "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS reset_token_expiry TIMESTAMP",
     ]:
         try:
             db.session.execute(text(migration_sql))

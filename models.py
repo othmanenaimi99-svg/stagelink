@@ -31,8 +31,6 @@ class Utilisateur(UserMixin, db.Model):
     email_verifie = db.Column(db.Boolean, default=False)
     code_verification = db.Column(db.String(6), nullable=True)
     code_expiry = db.Column(db.DateTime, nullable=True)
-    reset_token = db.Column(db.String(100), nullable=True)
-    reset_token_expiry = db.Column(db.DateTime, nullable=True)
 
     etudiant = db.relationship('Etudiant', backref='utilisateur', uselist=False, cascade='all, delete-orphan')
     entreprise = db.relationship('Entreprise', backref='utilisateur', uselist=False, cascade='all, delete-orphan')
