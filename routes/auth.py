@@ -25,10 +25,10 @@ def login():
             if not user.email_verifie:
                 # Compte non vérifié → renvoyer un code et rediriger
                 from services.email_service import generate_code, send_verification_code
-                from datetime import datetime, timedelta
+                from datetime import datetime, timedelta, timezone
                 code = generate_code()
                 user.code_verification = code
-                user.code_expiry = datetime.utcnow() + timedelta(minutes=10)
+                user.code_expiry = datetime.now(timezone.utc) + timedelta(minutes=30)
                 db.session.commit()
                 send_verification_code(user.email, code)
                 session['verify_user_id'] = user.id
@@ -203,10 +203,10 @@ def register_step4():
 
         # Générer et envoyer le code de vérification
         from services.email_service import generate_code, send_verification_code
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         code = generate_code()
         u.code_verification = code
-        u.code_expiry = datetime.utcnow() + timedelta(minutes=10)
+        u.code_expiry = datetime.now(timezone.utc) + timedelta(minutes=30)
         db.session.commit()
 
         nom = data.get('nom', '')
@@ -231,18 +231,21 @@ def verify_code():
     # Si pas de code en attente, en envoyer un automatiquement
     if not user.code_verification and request.method == 'GET':
         from services.email_service import generate_code, send_verification_code
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         code = generate_code()
         user.code_verification = code
-        user.code_expiry = datetime.utcnow() + timedelta(minutes=10)
+        user.code_expiry = datetime.now(timezone.utc) + timedelta(minutes=30)
         db.session.commit()
         send_verification_code(user.email, code)
 
     if request.method == 'POST':
-        from datetime import datetime
+        from datetime import datetime, timezone
         code_saisi = request.form.get('code', '').strip()
 
-        if not user.code_expiry or datetime.utcnow() > user.code_expiry:
+        expiry = user.code_expiry
+        if expiry and expiry.tzinfo is None:
+            expiry = expiry.replace(tzinfo=timezone.utc)
+        if not expiry or datetime.now(timezone.utc) > expiry:
             flash("Code expiré. Veuillez en demander un nouveau.", 'error')
             return render_template('auth/verify_code.html', email=user.email)
 
@@ -271,10 +274,10 @@ def resend_code():
         return redirect(url_for('auth.login'))
 
     from services.email_service import generate_code, send_verification_code
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     code = generate_code()
     user.code_verification = code
-    user.code_expiry = datetime.utcnow() + timedelta(minutes=10)
+    user.code_expiry = datetime.now(timezone.utc) + timedelta(minutes=30)
     db.session.commit()
     send_verification_code(user.email, code)
     flash("Nouveau code envoyé.", 'success')

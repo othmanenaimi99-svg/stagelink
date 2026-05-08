@@ -32,12 +32,12 @@ def send_verification_code(to_email, code, nom=''):
             Utilisez le code ci-dessous pour activer votre compte StageLink MA.
           </p>
           <div style="text-align:center;margin:32px 0">
-            <div style="display:inline-block;background:#EAF3FC;border:2px solid #185FA5;border-radius:12px;padding:18px 40px">
-              <span style="font-size:36px;font-weight:700;letter-spacing:10px;color:#185FA5">{code}</span>
+            <div style="display:inline-block;background:#EAF3FC;border:2px solid #185FA5;border-radius:12px;padding:18px 48px;min-width:260px">
+              <span style="font-size:32px;font-weight:700;letter-spacing:6px;color:#185FA5;white-space:nowrap">{' '.join(code)}</span>
             </div>
           </div>
           <p style="color:#9ca3af;font-size:12px;text-align:center;margin-top:24px">
-            Ce code expire dans <strong>10 minutes</strong>.<br>
+            Ce code expire dans <strong>30 minutes</strong>.<br>
             Si vous n'avez pas créé de compte, ignorez cet email.
           </p>
           <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0">
