@@ -76,6 +76,8 @@ def approuver_entreprise(entreprise_id):
     )
     db.session.add(notif)
     db.session.commit()
+    from services.email_service import send_company_status_email
+    send_company_status_email(entreprise.utilisateur.email, entreprise.nom, approved=True)
     flash(f"Entreprise « {entreprise.nom} » approuvée.", 'success')
     return redirect(url_for('admin.entreprises'))
 
@@ -92,6 +94,8 @@ def rejeter_entreprise(entreprise_id):
     )
     db.session.add(notif)
     db.session.commit()
+    from services.email_service import send_company_status_email
+    send_company_status_email(entreprise.utilisateur.email, entreprise.nom, approved=False, motif=motif)
     flash(f"Entreprise « {entreprise.nom} » rejetée.", 'success')
     return redirect(url_for('admin.entreprises'))
 
