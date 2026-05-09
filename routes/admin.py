@@ -132,7 +132,12 @@ def utilisateurs():
             Utilisateur.email.ilike(f'%{q}%') |
             Utilisateur.id.in_(etudiants_ids + entreprises_ids)
         )
-    users = query.order_by(Utilisateur.id.desc()).all()
+    from sqlalchemy.orm import joinedload
+    users = query.options(
+        joinedload(Utilisateur.etudiant),
+        joinedload(Utilisateur.entreprise),
+        joinedload(Utilisateur.admin)
+    ).order_by(Utilisateur.id.desc()).all()
     return render_template('admin/utilisateurs.html',
         utilisateurs=users, role_filtre=role_filter, search_query=q)
 
