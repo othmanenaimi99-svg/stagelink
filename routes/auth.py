@@ -285,7 +285,14 @@ def resend_code():
 def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
-        user = Utilisateur.query.filter_by(email=email).first()
+        print(f"[RESET] Demande reset pour: {email}")
+        try:
+            user = Utilisateur.query.filter_by(email=email).first()
+            print(f"[RESET] User trouvé: {user is not None}")
+        except Exception as e:
+            print(f"[RESET] Erreur DB: {e}")
+            flash("Erreur serveur. Réessayez.", 'error')
+            return render_template('auth/forgot_password.html')
         if user and user.actif:
             import secrets
             from datetime import datetime, timedelta
