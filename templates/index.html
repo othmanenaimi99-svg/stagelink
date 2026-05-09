@@ -184,11 +184,41 @@
   to   { left: 150%; }
 }
 
-/* ── Hero gradient + animations ── */
-.sl-hero {
-  background: linear-gradient(180deg, #EAF3FC 0%, #ffffff 100%);
+/* ── Hero animated gradient ── */
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
+
+.sl-hero {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(24, 95, 165, 0.13),
+    rgba(255, 255, 255, 0.95),
+    rgba(29, 158, 117, 0.10),
+    rgba(12, 68, 124, 0.11),
+    rgba(255, 255, 255, 0.95),
+    rgba(24, 95, 165, 0.09),
+    rgba(29, 158, 117, 0.08)
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 18s ease infinite;
+}
+
+.sl-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+  z-index: 0;
+}
+
 .sl-hero-inner {
+  position: relative;
+  z-index: 1;
   max-width: 700px;
   margin: 0 auto;
   text-align: center;
