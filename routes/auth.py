@@ -293,7 +293,7 @@ def forgot_password():
             print(f"[RESET] Erreur DB: {e}")
             flash("Erreur serveur. Réessayez.", 'error')
             return render_template('auth/forgot_password.html')
-        if user and user.actif:
+        if user:
             import secrets
             from datetime import datetime, timedelta
             from services.email_service import send_reset_email
