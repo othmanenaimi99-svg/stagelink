@@ -56,6 +56,44 @@ def send_verification_code(to_email, code, nom=''):
         return False
 
 
+def send_reset_email(to_email, reset_url, nom=''):
+    api_key = os.environ.get('RESEND_API_KEY')
+    if not api_key:
+        return False
+    resend.api_key = api_key
+    html_body = f"""
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:40px 32px;border:1px solid #e5e7eb;border-radius:16px;background:#fff">
+      <div style="text-align:center;margin-bottom:28px">
+        <h2 style="color:#185FA5;margin:0;font-size:22px">Stage<span style="color:#1D9E75">Link</span> MA</h2>
+      </div>
+      <h3 style="color:#111827;font-size:18px;margin-bottom:8px">Réinitialisation du mot de passe</h3>
+      <p style="color:#6b7280;font-size:14px;margin-bottom:28px">
+        {'Bonjour ' + nom + ',' if nom else 'Bonjour,'}<br>
+        Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe. Ce lien expire dans <strong>30 minutes</strong>.
+      </p>
+      <div style="text-align:center;margin:32px 0">
+        <a href="{reset_url}" style="display:inline-block;background:#185FA5;color:#fff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:600">
+          Réinitialiser mon mot de passe
+        </a>
+      </div>
+      <p style="color:#9ca3af;font-size:12px;text-align:center">Si vous n'avez pas demandé de réinitialisation, ignorez cet email.</p>
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0">
+      <p style="color:#9ca3af;font-size:11px;text-align:center">© 2026 StageLink MA · stagelinkma.com</p>
+    </div>
+    """
+    try:
+        resend.Emails.send({
+            "from": "StageLink MA <noreply@stagelinkma.com>",
+            "to": [to_email],
+            "subject": "Réinitialisation de votre mot de passe — StageLink MA",
+            "html": html_body
+        })
+        return True
+    except Exception as e:
+        print(f"[RESET EMAIL] Error {type(e).__name__}: {e}")
+        return False
+
+
 def send_company_status_email(to_email, nom_entreprise, approved, motif=''):
     api_key = os.environ.get('RESEND_API_KEY')
     if not api_key:
