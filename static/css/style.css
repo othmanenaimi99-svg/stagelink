@@ -584,6 +584,12 @@ textarea.form-control { resize: vertical; }
 .fill-green { background: var(--green); }
 .fill-orange { background: var(--orange); }
 
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 @keyframes matchFill {
   from { transform: scaleX(0); opacity: 0; }
   to   { transform: scaleX(1); opacity: 1; }
@@ -768,8 +774,29 @@ textarea.form-control { resize: vertical; }
 .sl-hero {
   padding: 56px 28px 48px;
   text-align: center;
-  background: linear-gradient(160deg, #EAF3FC 0%, #F5F9FF 40%, #ffffff 100%);
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(24, 95, 165, 0.13),
+    rgba(255, 255, 255, 0.95),
+    rgba(29, 158, 117, 0.10),
+    rgba(12, 68, 124, 0.11),
+    rgba(255, 255, 255, 0.95),
+    rgba(24, 95, 165, 0.09),
+    rgba(29, 158, 117, 0.08)
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 18s ease infinite;
 }
+.sl-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  z-index: 0;
+}
+.sl-hero > * { position: relative; z-index: 1; }
 .sl-hero-badge {
   display: inline-flex;
   align-items: center;
