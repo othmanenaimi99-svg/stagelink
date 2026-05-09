@@ -32,15 +32,6 @@ with app.app_context():
         except Exception:
             db.session.rollback()
 
-    # Marquer les anciens utilisateurs (sans code en attente) comme vérifiés
-    try:
-        db.session.execute(text(
-            "UPDATE utilisateur SET email_verifie = TRUE WHERE (email_verifie IS NULL OR email_verifie = FALSE) AND code_verification IS NULL"
-        ))
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-
     # Créer les compétences si elles n'existent pas
     try:
         for nom, categorie in COMPETENCES:
