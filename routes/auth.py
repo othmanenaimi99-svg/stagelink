@@ -288,7 +288,7 @@ def forgot_password():
         print(f"[RESET] Demande reset pour: {email}")
         try:
             user = Utilisateur.query.filter_by(email=email).first()
-            print(f"[RESET] User trouvé: {user is not None}")
+            print(f"[RESET] User trouvé: {user is not None}, actif: {user.actif if user else 'N/A'}")
         except Exception as e:
             print(f"[RESET] Erreur DB: {e}")
             flash("Erreur serveur. Réessayez.", 'error')
