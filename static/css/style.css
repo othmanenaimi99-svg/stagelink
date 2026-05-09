@@ -775,7 +775,9 @@ textarea.form-control { resize: vertical; }
   padding: 56px 28px 48px;
   text-align: center;
   position: relative;
-  background: #f8fbff;
+  background: linear-gradient(135deg, #d6e8f8, #f8fbff, #d4ede3, #eaf4fb, #dcf0ea, #f0f7ff);
+  background-size: 300% 300%;
+  animation: gradientShift 8s ease infinite;
   overflow: hidden;
 }
 .sl-hero > * { position: relative; z-index: 1; }
