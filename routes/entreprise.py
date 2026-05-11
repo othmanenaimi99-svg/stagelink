@@ -34,30 +34,28 @@ def verifie_required(f):
 @entreprise_bp.route('/dashboard')
 @entreprise_required
 def dashboard():
+    from sqlalchemy.orm import joinedload
     entreprise = current_user.entreprise
-    offres_actives = entreprise.offres.filter_by(statut='ACTIVE').all()
-    offres_all = entreprise.offres.all()
 
-    candidatures_attente = []
-    for offre in offres_actives:
-        for c in offre.candidatures.filter_by(statut='EN_ATTENTE').order_by(
-                Candidature.score_matching.desc()).all():
-            candidatures_attente.append(c)
-    candidatures_attente.sort(key=lambda c: c.score_matching, reverse=True)
+    offres_all = entreprise.offres.options(
+        joinedload(Offre.candidatures).joinedload(Candidature.etudiant)
+    ).all()
 
-    nb_total = sum(o.candidatures.count() for o in offres_all)
-    nb_attente = sum(o.candidatures.filter_by(statut='EN_ATTENTE').count() for o in offres_all)
-    nb_acceptee = sum(o.candidatures.filter_by(statut='ACCEPTEE').count() for o in offres_all)
-    scores = [c.score_matching for o in offres_all for c in o.candidatures.all() if c.score_matching]
+    offres_actives = [o for o in offres_all if o.statut == 'ACTIVE']
+    toutes_cands = [c for o in offres_all for c in o.candidatures]
+
+    candidatures_attente = sorted(
+        [c for c in toutes_cands if c.statut == 'EN_ATTENTE'],
+        key=lambda c: c.score_matching, reverse=True
+    )
+
+    nb_total    = len(toutes_cands)
+    nb_attente  = sum(1 for c in toutes_cands if c.statut == 'EN_ATTENTE')
+    nb_acceptee = sum(1 for c in toutes_cands if c.statut == 'ACCEPTEE')
+    scores      = [c.score_matching for c in toutes_cands if c.score_matching]
     score_moyen = round(sum(scores) / len(scores)) if scores else 0
-
-    nb_sans_feedback = 0
-    for o in offres_all:
-        for c in o.candidatures.filter_by(statut='REFUSEE').all():
-            if not c.feedback:
-                nb_sans_feedback += 1
-
-    nb_offres_fermees = entreprise.offres.filter_by(statut='FERMEE').count()
+    nb_sans_feedback = sum(1 for c in toutes_cands if c.statut == 'REFUSEE' and not c.feedback)
+    nb_offres_fermees = sum(1 for o in offres_all if o.statut == 'FERMEE')
 
     return render_template('entreprise/dashboard.html',
         entreprise=entreprise,
@@ -77,16 +75,19 @@ def candidatures():
     offre_id = request.args.get('offre_id', '')
     statut_filter = request.args.get('statut', '')
 
-    offres = entreprise.offres.all()
+    from sqlalchemy.orm import joinedload
+    offres = entreprise.offres.options(
+        joinedload(Offre.candidatures).joinedload(Candidature.etudiant)
+    ).all()
+
     all_candidatures = []
     for offre in offres:
-        q = offre.candidatures.order_by(Candidature.score_matching.desc())
-        if statut_filter:
-            q = q.filter_by(statut=statut_filter)
-        if offre_id and str(offre.id) == str(offre_id):
-            all_candidatures.extend(q.all())
-        elif not offre_id:
-            all_candidatures.extend(q.all())
+        if offre_id and str(offre.id) != str(offre_id):
+            continue
+        for c in offre.candidatures:
+            if statut_filter and c.statut != statut_filter:
+                continue
+            all_candidatures.append(c)
 
     all_candidatures.sort(key=lambda c: c.score_matching, reverse=True)
 
