@@ -29,32 +29,32 @@ def etudiant_required(f):
 @etudiant_bp.route('/dashboard')
 @etudiant_required
 def dashboard():
+    from sqlalchemy.orm import joinedload
     etudiant = current_user.etudiant
-    candidatures_recentes = (etudiant.candidatures
-        .order_by(Candidature.date_postulation.desc()).limit(5).all())
+
+    toutes_cands = (etudiant.candidatures
+        .options(joinedload(Candidature.offre).joinedload(Offre.entreprise),
+                 joinedload(Candidature.convention))
+        .order_by(Candidature.date_postulation.desc()).all())
+
+    candidatures_recentes = toutes_cands[:5]
+    nb_total    = len(toutes_cands)
+    nb_attente  = sum(1 for c in toutes_cands if c.statut == 'EN_ATTENTE')
+    nb_acceptee = sum(1 for c in toutes_cands if c.statut == 'ACCEPTEE')
+    nb_refusee  = sum(1 for c in toutes_cands if c.statut == 'REFUSEE')
+    scores      = [c.score_matching for c in toutes_cands if c.score_matching]
+    score_moyen = round(sum(scores) / len(scores)) if scores else 0
+    feedbacks   = [c for c in toutes_cands if c.statut == 'REFUSEE' and c.feedback]
 
     offres_actives = Offre.query.filter_by(statut='ACTIVE').join(
-        Offre.entreprise).filter_by(est_verifiee=True).all()
+        Offre.entreprise).filter_by(est_verifiee=True).options(
+        joinedload(Offre.entreprise), joinedload(Offre.competences)).all()
     offres_avec_scores = get_offres_avec_scores(etudiant, offres_actives)[:3]
-    nb_offres_count = Offre.query.filter_by(statut='ACTIVE').join(
-        Offre.entreprise).filter_by(est_verifiee=True).count()
-
-    feedbacks = []
-    for c in etudiant.candidatures.filter_by(statut='REFUSEE').all():
-        if c.feedback:
-            feedbacks.append(c)
-
-    nb_total = etudiant.candidatures.count()
-    nb_attente = etudiant.candidatures.filter_by(statut='EN_ATTENTE').count()
-    nb_acceptee = etudiant.candidatures.filter_by(statut='ACCEPTEE').count()
-    nb_refusee = etudiant.candidatures.filter_by(statut='REFUSEE').count()
-
-    scores = [c.score_matching for c in etudiant.candidatures.all() if c.score_matching]
-    score_moyen = round(sum(scores) / len(scores)) if scores else 0
+    nb_offres_count = len(offres_actives)
 
     convention_dispo = None
-    for c in etudiant.candidatures.filter_by(statut='ACCEPTEE').all():
-        if c.convention and c.convention.pdf_path:
+    for c in toutes_cands:
+        if c.statut == 'ACCEPTEE' and c.convention and c.convention.pdf_path:
             convention_dispo = c
             break
 
@@ -99,7 +99,11 @@ def offres():
             Offre.ville.ilike(f'%{q}%')
         )
 
-    offres_list = query.all()
+    from sqlalchemy.orm import joinedload
+    offres_list = query.options(
+        joinedload(Offre.entreprise),
+        joinedload(Offre.competences)
+    ).all()
     offres_avec_scores = get_offres_avec_scores(etudiant, offres_list)
 
     if tri == 'date':
@@ -194,7 +198,10 @@ def postuler(offre_id):
 def candidatures():
     etudiant = current_user.etudiant
     statut_filter = request.args.get('statut', '')
-    cands = etudiant.candidatures.order_by(Candidature.date_postulation.desc())
+    from sqlalchemy.orm import joinedload
+    cands = etudiant.candidatures.options(
+        joinedload(Candidature.offre).joinedload(Offre.entreprise)
+    ).order_by(Candidature.date_postulation.desc())
     if statut_filter:
         cands = cands.filter_by(statut=statut_filter)
     return render_template('etudiant/candidatures.html',
