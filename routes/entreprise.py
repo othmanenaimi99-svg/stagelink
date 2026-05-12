@@ -261,3 +261,36 @@ def profil():
         flash("Profil mis à jour.", 'success')
         return redirect(url_for('entreprise.profil'))
     return render_template('entreprise/profil.html', entreprise=entreprise)
+
+
+@entreprise_bp.route('/upload-photo', methods=['POST'])
+@entreprise_required
+def upload_photo():
+    from flask import current_app
+    entreprise = current_user.entreprise
+    file = request.files.get('photo')
+    if not file or not file.filename:
+        flash("Aucun fichier sélectionné.", 'error')
+        return redirect(url_for('entreprise.profil'))
+    if not file.filename.lower().rsplit('.', 1)[-1] in {'jpg', 'jpeg', 'png', 'webp'}:
+        flash("Format invalide. Utilisez JPG, PNG ou WebP.", 'error')
+        return redirect(url_for('entreprise.profil'))
+    try:
+        import cloudinary, cloudinary.uploader
+        cloudinary.config(
+            cloud_name=current_app.config['CLOUDINARY_CLOUD_NAME'],
+            api_key=current_app.config['CLOUDINARY_API_KEY'],
+            api_secret=current_app.config['CLOUDINARY_API_SECRET']
+        )
+        result = cloudinary.uploader.upload(
+            file, folder='stagelink/logos',
+            public_id=f'entreprise_{entreprise.id}',
+            overwrite=True, resource_type='image',
+            transformation=[{'width': 200, 'height': 200, 'crop': 'fill'}]
+        )
+        entreprise.photo_profil = result['secure_url']
+        db.session.commit()
+        flash("Logo mis à jour !", 'success')
+    except Exception as e:
+        flash("Erreur lors de l'upload.", 'error')
+    return redirect(url_for('entreprise.profil'))

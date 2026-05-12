@@ -1,4 +1,5 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
+{% from '_macros.html' import avatar %}
 {% block title %}Offres de stage — StageLink MA{% endblock %}
 {% block body %}
 <div class="topbar">
@@ -12,7 +13,7 @@
     <a href="{{ url_for('etudiant.marquer_notifications_lues') }}" class="notif-btn">
       🔔{% if notif_count > 0 %}<span class="notif-dot"></span>{% endif %}
     </a>
-    <div class="avatar">{{ etudiant.initiales }}</div>
+    {{ avatar(etudiant) }}
     <span style="font-size:13px;color:#666">{{ etudiant.nom_complet.split()[0] }} {{ etudiant.nom_complet.split()[-1][0] if etudiant.nom_complet.split()|length > 1 else '' }}.</span>
   </div>
 </div>
@@ -26,7 +27,7 @@
 <div class="body-layout">
   <div class="sidebar">
     <div class="sidebar-profile">
-      <div class="avatar avatar-lg" style="margin-bottom:8px">{{ etudiant.initiales }}</div>
+      {{ avatar(etudiant, size="avatar-lg", extra_style="margin-bottom:8px") }}
       <div class="sidebar-profile-name">{{ etudiant.nom_complet }}</div>
       <div class="sidebar-profile-sub">{{ etudiant.filiere }} · {{ etudiant.niveau }} · {{ etudiant.universite }}</div>
       <div class="profile-bar-wrap">
@@ -193,3 +194,4 @@ function toggleFavori(offreId, btn) {
 }
 </script>
 {% endblock %}
+

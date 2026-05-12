@@ -70,6 +70,7 @@ class Etudiant(db.Model):
     niveau = db.Column(db.String(20))
     ville = db.Column(db.String(100))
     cv_path = db.Column(db.String(256))
+    photo_profil = db.Column(db.String(512), nullable=True)
     date_inscription = db.Column(db.Date, default=date.today)
 
     competences = db.relationship('Competence', secondary=etudiant_competence, backref='etudiants')
@@ -107,6 +108,7 @@ class Entreprise(db.Model):
     description = db.Column(db.Text)
     rc = db.Column(db.String(100))
     est_verifiee = db.Column(db.Boolean, default=False)
+    photo_profil = db.Column(db.String(512), nullable=True)
     date_inscription = db.Column(db.Date, default=date.today)
 
     offres = db.relationship('Offre', backref='entreprise', lazy='dynamic', cascade='all, delete-orphan')

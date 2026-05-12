@@ -1,10 +1,11 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
+{% from '_macros.html' import avatar %}
 {% block title %}Mes offres — StageLink MA{% endblock %}
 {% block body %}
 <div class="topbar">
   <div class="logo">Stage<span>Link</span> MA</div>
   <div class="topbar-right">
-    <div class="avatar" style="background:var(--green-light);color:var(--green-dark)">{{ entreprise.initiales }}</div>
+    {{ avatar(entreprise, extra_style="background:var(--green-light);color:var(--green-dark)") }}
     <span style="font-size:13px;color:#666">{{ entreprise.nom }}</span>
   </div>
 </div>
@@ -18,7 +19,7 @@
 <div class="body-layout">
   <div class="sidebar">
     <div class="sidebar-profile">
-      <div class="avatar avatar-lg" style="background:var(--green-light);color:var(--green-dark);margin-bottom:8px">{{ entreprise.initiales }}</div>
+      {{ avatar(entreprise, size="avatar-lg", extra_style="background:var(--green-light);color:var(--green-dark);margin-bottom:8px") }}
       <div class="sidebar-profile-name">{{ entreprise.nom }}</div>
       <div class="sidebar-profile-sub">{{ entreprise.secteur }} · {{ entreprise.ville }}</div>
     </div>
@@ -98,3 +99,4 @@
   </div>
 </div>
 {% endblock %}
+

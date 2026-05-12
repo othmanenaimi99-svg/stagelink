@@ -333,6 +333,39 @@ def mes_favoris():
         notif_count=get_notif_count())
 
 
+@etudiant_bp.route('/upload-photo', methods=['POST'])
+@etudiant_required
+def upload_photo():
+    from flask import current_app
+    etudiant = current_user.etudiant
+    file = request.files.get('photo')
+    if not file or not file.filename:
+        flash("Aucun fichier sélectionné.", 'error')
+        return redirect(url_for('etudiant.profil'))
+    if not file.filename.lower().rsplit('.', 1)[-1] in {'jpg', 'jpeg', 'png', 'webp'}:
+        flash("Format invalide. Utilisez JPG, PNG ou WebP.", 'error')
+        return redirect(url_for('etudiant.profil'))
+    try:
+        import cloudinary, cloudinary.uploader
+        cloudinary.config(
+            cloud_name=current_app.config['CLOUDINARY_CLOUD_NAME'],
+            api_key=current_app.config['CLOUDINARY_API_KEY'],
+            api_secret=current_app.config['CLOUDINARY_API_SECRET']
+        )
+        result = cloudinary.uploader.upload(
+            file, folder='stagelink/photos',
+            public_id=f'etudiant_{etudiant.id}',
+            overwrite=True, resource_type='image',
+            transformation=[{'width': 200, 'height': 200, 'crop': 'fill', 'gravity': 'face'}]
+        )
+        etudiant.photo_profil = result['secure_url']
+        db.session.commit()
+        flash("Photo mise à jour !", 'success')
+    except Exception as e:
+        flash("Erreur lors de l'upload.", 'error')
+    return redirect(url_for('etudiant.profil'))
+
+
 @etudiant_bp.route('/notifications/lire')
 @etudiant_required
 def marquer_notifications_lues():
