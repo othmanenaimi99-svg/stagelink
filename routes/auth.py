@@ -241,8 +241,11 @@ def verify_code():
     if request.method == 'POST':
         from datetime import datetime
         code_saisi = request.form.get('code', '').strip()
+        now = datetime.utcnow()
+        expiry = user.code_expiry
+        print(f"[VERIFY] now={now} expiry={expiry} tzinfo={getattr(expiry,'tzinfo',None)} expired={not expiry or now > expiry}")
 
-        if not user.code_expiry or datetime.utcnow() > user.code_expiry:
+        if not expiry or now > expiry:
             flash("Code expiré. Veuillez en demander un nouveau.", 'error')
             return render_template('auth/verify_code.html', email=user.email)
 
