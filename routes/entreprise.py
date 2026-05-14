@@ -10,8 +10,10 @@ entreprise_bp = Blueprint('entreprise', __name__, url_prefix='/entreprise')
 def entreprise_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'ENTREPRISE':
-            abort(403)
+        if not current_user.is_authenticated:
+            return redirect(url_for('auth.login'))
+        if current_user.role != 'ENTREPRISE':
+            return redirect(url_for('auth.login'))
         if not current_user.email_verifie:
             from flask import session as flask_session
             flask_session['verify_user_id'] = current_user.id

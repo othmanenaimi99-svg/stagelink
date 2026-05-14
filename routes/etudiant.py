@@ -15,8 +15,10 @@ def get_notif_count():
 def etudiant_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'ETUDIANT':
-            abort(403)
+        if not current_user.is_authenticated:
+            return redirect(url_for('auth.login'))
+        if current_user.role != 'ETUDIANT':
+            return redirect(url_for('auth.login'))
         if not current_user.email_verifie:
             from flask import session as flask_session
             flask_session['verify_user_id'] = current_user.id

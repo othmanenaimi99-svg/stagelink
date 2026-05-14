@@ -10,8 +10,10 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'ADMIN':
-            abort(403)
+        if not current_user.is_authenticated:
+            return redirect(url_for('auth.login'))
+        if current_user.role != 'ADMIN':
+            return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return login_required(decorated)
 
