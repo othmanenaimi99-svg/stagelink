@@ -37,12 +37,16 @@ def dashboard():
     from sqlalchemy.orm import joinedload
     entreprise = current_user.entreprise
 
-    offres_all = entreprise.offres.options(
-        joinedload(Offre.candidatures).joinedload(Candidature.etudiant)
-    ).all()
-
+    offres_all = Offre.query.filter_by(entreprise_id=entreprise.id).all()
     offres_actives = [o for o in offres_all if o.statut == 'ACTIVE']
-    toutes_cands = [c for o in offres_all for c in o.candidatures]
+
+    toutes_cands = (
+        Candidature.query
+        .options(joinedload(Candidature.etudiant))
+        .join(Offre, Candidature.offre_id == Offre.id)
+        .filter(Offre.entreprise_id == entreprise.id)
+        .all()
+    )
 
     candidatures_attente = sorted(
         [c for c in toutes_cands if c.statut == 'EN_ATTENTE'],
@@ -76,20 +80,20 @@ def candidatures():
     statut_filter = request.args.get('statut', '')
 
     from sqlalchemy.orm import joinedload
-    offres = entreprise.offres.options(
-        joinedload(Offre.candidatures).joinedload(Candidature.etudiant)
-    ).all()
+    offres = Offre.query.filter_by(entreprise_id=entreprise.id).all()
 
-    all_candidatures = []
-    for offre in offres:
-        if offre_id and str(offre.id) != str(offre_id):
-            continue
-        for c in offre.candidatures:
-            if statut_filter and c.statut != statut_filter:
-                continue
-            all_candidatures.append(c)
+    cands_query = (
+        Candidature.query
+        .options(joinedload(Candidature.etudiant))
+        .join(Offre, Candidature.offre_id == Offre.id)
+        .filter(Offre.entreprise_id == entreprise.id)
+    )
+    if offre_id:
+        cands_query = cands_query.filter(Candidature.offre_id == int(offre_id))
+    if statut_filter:
+        cands_query = cands_query.filter(Candidature.statut == statut_filter)
 
-    all_candidatures.sort(key=lambda c: c.score_matching, reverse=True)
+    all_candidatures = cands_query.order_by(Candidature.score_matching.desc()).all()
 
     return render_template('entreprise/candidatures.html',
         entreprise=entreprise,
