@@ -292,7 +292,7 @@ def profil():
                 cv_file,
                 resource_type='raw',
                 folder='stagelink/cvs',
-                public_id=f'cv_{etudiant.id}',
+                public_id=f'cv_{etudiant.id}.pdf',
                 overwrite=True
             )
             etudiant.cv_path = result['secure_url']

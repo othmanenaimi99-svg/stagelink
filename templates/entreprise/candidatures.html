@@ -109,7 +109,7 @@
             </div>
             {% endif %}
             {% if c.etudiant.cv_path %}
-            <a href="{{ c.etudiant.cv_path }}" target="_blank" class="btn btn-secondary btn-xs btn-full" style="margin-top:5px;font-size:10px">📄 CV</a>
+            <a href="{{ c.etudiant.cv_path if c.etudiant.cv_path.endswith('.pdf') else c.etudiant.cv_path + '.pdf' }}" target="_blank" class="btn btn-secondary btn-xs btn-full" style="margin-top:5px;font-size:10px">📄 CV</a>
             {% endif %}
           </div>
         </div>

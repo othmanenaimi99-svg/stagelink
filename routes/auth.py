@@ -163,7 +163,7 @@ def register_step4():
                         cv_file,
                         resource_type='raw',
                         folder='stagelink/cvs',
-                        public_id=f'cv_{u.id}',
+                        public_id=f'cv_{u.id}.pdf',
                         overwrite=True
                     )
                     cv_path = result['secure_url']
