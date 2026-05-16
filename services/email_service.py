@@ -94,11 +94,21 @@ def send_reset_email(to_email, reset_url, nom=''):
         return False
 
 
-def send_candidature_acceptee_email(to_email, nom_etudiant, titre_offre, nom_entreprise):
+def send_candidature_acceptee_email(to_email, nom_etudiant, titre_offre, nom_entreprise, email_entreprise='', ville_entreprise=''):
     api_key = os.environ.get('RESEND_API_KEY')
     if not api_key:
         return False
     resend.api_key = api_key
+    contact_block = f"""
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin-top:20px">
+      <p style="font-size:13px;font-weight:600;color:#166534;margin:0 0 10px 0">Coordonnées de l'entreprise</p>
+      <table style="font-size:13px;color:#374151;border-collapse:collapse;width:100%">
+        <tr><td style="padding:3px 0;color:#6b7280;width:80px">Entreprise</td><td style="padding:3px 0"><strong>{nom_entreprise}</strong></td></tr>
+        {'<tr><td style="padding:3px 0;color:#6b7280">Email</td><td style="padding:3px 0"><a href="mailto:' + email_entreprise + '" style="color:#185FA5">' + email_entreprise + '</a></td></tr>' if email_entreprise else ''}
+        {'<tr><td style="padding:3px 0;color:#6b7280">Ville</td><td style="padding:3px 0">' + ville_entreprise + '</td></tr>' if ville_entreprise else ''}
+      </table>
+    </div>
+    """
     html_body = f"""
     <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:40px 32px;border:1px solid #e5e7eb;border-radius:16px;background:#fff">
       <div style="text-align:center;margin-bottom:28px">
@@ -110,8 +120,9 @@ def send_candidature_acceptee_email(to_email, nom_etudiant, titre_offre, nom_ent
       <p style="color:#6b7280;font-size:14px;line-height:1.6">
         Félicitations ! Votre candidature pour le poste <strong>« {titre_offre} »</strong> chez <strong>{nom_entreprise}</strong> a été acceptée.
       </p>
-      <p style="color:#6b7280;font-size:14px;line-height:1.6;margin-top:12px">
-        L'entreprise va prendre contact avec vous prochainement. Connectez-vous à votre espace pour suivre l'évolution de votre dossier.
+      {contact_block}
+      <p style="color:#6b7280;font-size:13px;line-height:1.6;margin-top:16px">
+        Prenez contact avec l'entreprise directement par email pour convenir des prochaines étapes.
       </p>
       <div style="text-align:center;margin:32px 0">
         <a href="https://stagelinkma.com/etudiant/candidatures" style="display:inline-block;background:#1D9E75;color:#fff;text-decoration:none;padding:13px 32px;border-radius:10px;font-size:14px;font-weight:600">Voir ma candidature</a>

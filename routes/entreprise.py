@@ -130,7 +130,9 @@ def accepter_candidature(candidature_id):
         to_email=c.etudiant.utilisateur.email,
         nom_etudiant=c.etudiant.nom_complet,
         titre_offre=c.offre.titre,
-        nom_entreprise=c.offre.entreprise.nom
+        nom_entreprise=c.offre.entreprise.nom,
+        email_entreprise=c.offre.entreprise.utilisateur.email,
+        ville_entreprise=c.offre.entreprise.ville or ''
     )
 
     flash(f"Candidature de {c.etudiant.nom_complet} acceptée.", 'success')
