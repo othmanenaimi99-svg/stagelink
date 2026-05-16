@@ -124,6 +124,15 @@ def accepter_candidature(candidature_id):
     )
     db.session.add(notif)
     db.session.commit()
+
+    from services.email_service import send_candidature_acceptee_email
+    send_candidature_acceptee_email(
+        to_email=c.etudiant.utilisateur.email,
+        nom_etudiant=c.etudiant.nom_complet,
+        titre_offre=c.offre.titre,
+        nom_entreprise=c.offre.entreprise.nom
+    )
+
     flash(f"Candidature de {c.etudiant.nom_complet} acceptée.", 'success')
     return redirect(url_for('entreprise.candidatures'))
 
@@ -154,6 +163,16 @@ def refuser_candidature(candidature_id):
     )
     db.session.add(notif)
     db.session.commit()
+
+    from services.email_service import send_candidature_refusee_email
+    send_candidature_refusee_email(
+        to_email=c.etudiant.utilisateur.email,
+        nom_etudiant=c.etudiant.nom_complet,
+        titre_offre=c.offre.titre,
+        nom_entreprise=c.offre.entreprise.nom,
+        feedback=feedback_text
+    )
+
     flash(f"Candidature de {c.etudiant.nom_complet} refusée avec feedback.", 'success')
     return redirect(url_for('entreprise.candidatures'))
 

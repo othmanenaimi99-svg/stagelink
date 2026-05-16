@@ -94,6 +94,85 @@ def send_reset_email(to_email, reset_url, nom=''):
         return False
 
 
+def send_candidature_acceptee_email(to_email, nom_etudiant, titre_offre, nom_entreprise):
+    api_key = os.environ.get('RESEND_API_KEY')
+    if not api_key:
+        return False
+    resend.api_key = api_key
+    html_body = f"""
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:40px 32px;border:1px solid #e5e7eb;border-radius:16px;background:#fff">
+      <div style="text-align:center;margin-bottom:28px">
+        <h2 style="color:#185FA5;margin:0;font-size:22px">Stage<span style="color:#1D9E75">Link</span> MA</h2>
+      </div>
+      <div style="text-align:center;font-size:40px;margin-bottom:16px">🎉</div>
+      <h3 style="color:#111827;font-size:18px;margin-bottom:12px;text-align:center">Candidature acceptée !</h3>
+      <p style="color:#6b7280;font-size:14px;margin-bottom:8px">Bonjour <strong>{nom_etudiant}</strong>,</p>
+      <p style="color:#6b7280;font-size:14px;line-height:1.6">
+        Félicitations ! Votre candidature pour le poste <strong>« {titre_offre} »</strong> chez <strong>{nom_entreprise}</strong> a été acceptée.
+      </p>
+      <p style="color:#6b7280;font-size:14px;line-height:1.6;margin-top:12px">
+        L'entreprise va prendre contact avec vous prochainement. Connectez-vous à votre espace pour suivre l'évolution de votre dossier.
+      </p>
+      <div style="text-align:center;margin:32px 0">
+        <a href="https://stagelinkma.com/etudiant/candidatures" style="display:inline-block;background:#1D9E75;color:#fff;text-decoration:none;padding:13px 32px;border-radius:10px;font-size:14px;font-weight:600">Voir ma candidature</a>
+      </div>
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0">
+      <p style="color:#9ca3af;font-size:11px;text-align:center">© 2026 StageLink MA · stagelinkma.com</p>
+    </div>
+    """
+    try:
+        resend.Emails.send({
+            "from": "StageLink MA <noreply@stagelinkma.com>",
+            "to": [to_email],
+            "subject": f"🎉 Candidature acceptée — {titre_offre} chez {nom_entreprise}",
+            "html": html_body
+        })
+        return True
+    except Exception as e:
+        print(f"[CANDIDATURE EMAIL] Error {type(e).__name__}: {e}")
+        return False
+
+
+def send_candidature_refusee_email(to_email, nom_etudiant, titre_offre, nom_entreprise, feedback=''):
+    api_key = os.environ.get('RESEND_API_KEY')
+    if not api_key:
+        return False
+    resend.api_key = api_key
+    feedback_block = f'<p style="background:#f9fafb;border-left:3px solid #e5e7eb;padding:12px 16px;border-radius:6px;color:#6b7280;font-size:13px;margin-top:16px;line-height:1.6"><strong>Feedback :</strong> {feedback}</p>' if feedback else ''
+    html_body = f"""
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:auto;padding:40px 32px;border:1px solid #e5e7eb;border-radius:16px;background:#fff">
+      <div style="text-align:center;margin-bottom:28px">
+        <h2 style="color:#185FA5;margin:0;font-size:22px">Stage<span style="color:#1D9E75">Link</span> MA</h2>
+      </div>
+      <h3 style="color:#111827;font-size:18px;margin-bottom:12px">Résultat de votre candidature</h3>
+      <p style="color:#6b7280;font-size:14px;margin-bottom:8px">Bonjour <strong>{nom_etudiant}</strong>,</p>
+      <p style="color:#6b7280;font-size:14px;line-height:1.6">
+        Nous vous informons que votre candidature pour le poste <strong>« {titre_offre} »</strong> chez <strong>{nom_entreprise}</strong> n'a pas été retenue cette fois-ci.
+      </p>
+      {feedback_block}
+      <p style="color:#6b7280;font-size:14px;line-height:1.6;margin-top:16px">
+        Ne vous découragez pas — de nombreuses autres offres vous attendent sur StageLink MA.
+      </p>
+      <div style="text-align:center;margin:32px 0">
+        <a href="https://stagelinkma.com/etudiant/offres" style="display:inline-block;background:#185FA5;color:#fff;text-decoration:none;padding:13px 32px;border-radius:10px;font-size:14px;font-weight:600">Voir d'autres offres</a>
+      </div>
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0">
+      <p style="color:#9ca3af;font-size:11px;text-align:center">© 2026 StageLink MA · stagelinkma.com</p>
+    </div>
+    """
+    try:
+        resend.Emails.send({
+            "from": "StageLink MA <noreply@stagelinkma.com>",
+            "to": [to_email],
+            "subject": f"Résultat de votre candidature — {titre_offre}",
+            "html": html_body
+        })
+        return True
+    except Exception as e:
+        print(f"[CANDIDATURE EMAIL] Error {type(e).__name__}: {e}")
+        return False
+
+
 def send_company_status_email(to_email, nom_entreprise, approved, motif=''):
     api_key = os.environ.get('RESEND_API_KEY')
     if not api_key:
